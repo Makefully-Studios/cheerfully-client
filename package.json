@@ -1,0 +1,17 @@
+{
+    "name": "wrapfully-client",
+    "version": "0.0.1",
+    "description": "Reads build/deploy settings to send to Wrapfully server",
+    "main": "deploy.js",
+    "module": "deploy.js",
+    "contributors": [
+        "Derek Detweiler <derek@makefullystudios.com>"
+    ],
+    "license": "",
+    "dependencies": {
+        "archiver": "^4.0.1",
+        "request": "^2.88.2",
+        "rimraf": "^3.0.2",
+        "unzip-stream": "^0.3.0"
+    }
+}
