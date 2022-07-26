@@ -68,16 +68,27 @@ const
     },
     args = process.argv,
     builder = args[2] || 'all',
-    packagePath = args[3] || './package.json',
-    gameKey = args[4] || '',
-    server = args[5] || 'http://buildwin.makefullystudios.com:9630/';
+    server = args[3] || 'http://buildwin.makefullystudios.com:9630/';
 
-fs.readFile(packagePath, (err, data) => {
-    const pkg = JSON.parse(data);
+fs.readFile('./package.json', (err, data) => {
+    const
+        pkg = JSON.parse(data);
 
     if (err) {
         throw err;
     }
 
-    send(`${pkg.name}-${pkg.version}${gameKey ? '_' + gameKey : ''}`, data, server, builder, pkg.config.deployFolder || 'deploy');
+    fs.readFile('./wrapfully.json', (err, data) => {
+        const
+            wrapfullyConfig = JSON.parse(data);
+    
+        if (!err) {
+            pkg.config = {
+                ...pkg.config,
+                ...wrapfullyConfig
+            };
+        }
+
+        send(`${pkg.name}-${pkg.version}`, data, server, builder, pkg.config.deployFolder || 'deploy');
+    });
 });
