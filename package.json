@@ -1,6 +1,6 @@
 {
     "name": "wrapfully-client",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Reads build/deploy settings to send to Wrapfully server",
     "main": "deploy.js",
     "module": "deploy.js",

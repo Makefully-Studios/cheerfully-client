@@ -89,6 +89,6 @@ fs.readFile('./package.json', (err, data) => {
             };
         }
 
-        send(`${pkg.name}-${pkg.version}`, data, server, builder, pkg.config.deployFolder || 'deploy');
+        send(`${pkg.name}-${pkg.version}`, JSON.stringify(pkg), server, builder, pkg.config.deployFolder || 'deploy');
     });
 });
