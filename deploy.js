@@ -3,21 +3,13 @@
 const
     archiver = require('archiver'),
     fs = require('fs'),
-    request = require('request'),
+    axios = require('axios'),
     unzipper = require('unzip-stream'),
-    archive = function (deployFolder, contents, output, done) {
+    archive = function (deployFolder, contents) {
         var archive = archiver('zip', {
             zlib: {
                 level: 0
             }
-        });
-    
-        // listen for all archive data to be written
-        // 'close' event is fired only when a file descriptor is involved
-        output.on('close', function () {
-            console.log('Zipped ' + archive.pointer() + ' total bytes');
-
-            done();
         });
     
         // good practice to catch warnings (ie stat failures and other non-blocking errors)
@@ -31,10 +23,11 @@ const
         archive.on('error', function (err) {
             throw err;
         });
-    
-        // pipe archive data to the file
-        archive.pipe(output);
-    
+        // 'close' event is fired only when a file descriptor is involved
+        archive.on('close', function () {
+            console.log('Zipped ' + archive.pointer() + ' total bytes');
+        });
+
         archive.directory(`${deployFolder}/`, 'deploy');
         archive.file(`${deployFolder}/index.html`, {name: 'deploy/index.html'});
         if (fs.existsSync('assets/meta/')) {
@@ -43,16 +36,28 @@ const
         archive.append(contents, {name: 'package.json'});
 
         archive.finalize();
+
+        return archive;
     },
-    send = function (gameId, contents, server, builder, deployFolder) {
+    send = async function (gameId, contents, server, builder, deployFolder) {
         const
-            dst = unzipper.Extract({
+            dst = autoExtract === 'extract' ? unzipper.Extract({
                 path: './output/',
                 concurrency: 1
-            }),
-            ws = request.post(server + builder + '/' + gameId);
-                
-        ws.on('error', function (err) {
+            }) : fs.createWriteStream(`./output/${pkg.name}-${pkg.version}-${builder}.zip`),
+            //ws = request.post(server + builder + '/' + gameId),
+            archiveStream = archive(deployFolder, contents),
+            {data} = await axios.post(server + builder + '/' + gameId, archiveStream, {
+                maxRedirects: 0, // avoid buffering the entire stream
+                responseType: 'stream'
+            });
+
+        // listen for all archive data to be written
+        archiveStream.on('close', function () {
+            console.log('completed send');
+        });
+    
+        data.on('error', function (err) {
             if (err.code === 'ECONNREFUSED') {
                 console.warn(`Cannot connect to Wrapfully server "${server}"`);
             } else {
@@ -60,15 +65,12 @@ const
             }
         });
 
-        ws.pipe(dst);
-            
-        archive(deployFolder, contents, ws, () => { //once done:
-            console.log('completed send');
-        });
+        data.pipe(dst);
     },
     args = process.argv,
-    builder = args[2] || 'all',
-    server = args[3] || 'http://buildwin.makefullystudios.com:9630/';
+    builder = args[2] ?? 'all',
+    server = args[3] ?? 'http://buildwin.makefullystudios.com:9630/',
+    autoExtract = args[4] ?? 'extract';
 
 fs.readFile('./package.json', (err, data) => {
     const
