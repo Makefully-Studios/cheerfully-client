@@ -1,16 +1,21 @@
 {
-    "name": "wrapfully-client",
-    "version": "0.0.4",
-    "description": "Reads build/deploy settings to send to Wrapfully server",
-    "main": "deploy.js",
-    "module": "deploy.js",
+    "name": "cheerfully-client",
+    "version": "0.0.5",
+    "description": "Client tools for Cheerfully service.",
+    "main": "cheer.js",
+    "module": "cheer.js",
     "contributors": [
         "Derek Detweiler <derek@makefullystudios.com>"
     ],
+    "scripts": {
+        "test-elevenlabs": "node ./cheer.js -service elevenlabs",
+        "test-polly": "node ./cheer.js -service polly",
+        "test-rhubarb": "node ./cheer.js -service rhubarb",
+        "test-transcribe": "node ./cheer.js -service transcribe"
+    },
     "license": "",
     "dependencies": {
         "archiver": "^4.0.1",
-        "axios": "^1.3.4",
         "rimraf": "^3.0.2",
         "unzip-stream": "^0.3.0"
     }

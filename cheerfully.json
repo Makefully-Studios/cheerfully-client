@@ -1,0 +1,37 @@
+{
+    "rhubarb": {
+        "extract": true,
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    },
+    "polly": [{
+        "extract": true,
+        "script": "./example/script.json",
+        "output": "./example/vo/en/",
+        "difference": true,
+        "language": "en-US",
+        "voice": "Ivy"
+    }],
+    "elevenlabs": [{
+        "extract": true,
+        "script": "./example/script.json",
+        "output": "./example/vo/en/",
+        "difference": true,
+        "voice": "Gigi"
+    }],
+    "transcription": [{
+        "extract": true,
+        "script": "./example/vo/en.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/",
+        "difference": true,
+        "language": "en-US"
+    }, {
+        "extract": true,
+        "script": "./example/vo/es.json",
+        "src": "./example/vo/es/",
+        "output": "./example/captions/es/",
+        "difference": true,
+        "language": "es-ES"
+    }]
+}
