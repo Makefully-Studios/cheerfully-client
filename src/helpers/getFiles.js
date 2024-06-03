@@ -4,7 +4,7 @@ const
     getFiles = async ({folder = './', compareAgainst = null, fileTypes = []}) => {
         const
             all = (await fs.readdir(folder))
-                .filter((file) => (file.indexOf('.') !== 0) && (!fileTypes || matches(file, fileTypes)));
+                .filter((file) => (file.indexOf('.') !== 0) && (fileTypes.length === 0 || matches(file, fileTypes)));
 
         if (compareAgainst) {
             const

@@ -16,7 +16,7 @@ const
 
         if (difference && script) {
             const
-                {missing} = getFiles({
+                {missing} = await getFiles({
                     compareAgainst: typeof script === 'string' ? JSON.parse(await fs.readFile(script)) : script,
                     folder: src
                 });
@@ -24,8 +24,8 @@ const
             if (missing.length === 0) {
                 console.log('Captions already up-to-date.');
             } else {
-                missing.forEach((file) => archive.file(file, {
-                    name: file.replace(src, '')
+                missing.forEach((file) => archive.file(`${src}${file}`, {
+                    name: file
                 }));
             }
 

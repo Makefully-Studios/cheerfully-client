@@ -16,25 +16,7 @@ const
         rhubarb,
         transcription
     },
-    getJSON = (path) => new Promise ((resolve, reject) => {
-        fs.readFile(path, (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                let json = null;
-                
-                try {
-                    json = JSON.parse(data);
-                } catch (e) {
-                    reject(e);
-                }
-        
-                if (json) {
-                    resolve(json);
-                }
-            }
-        });
-    }),
+    getJSON = require('./helpers/getJSON'),
     postStream = (url, stream) => new Promise ((resolve, reject) => {
         const
             protocol = url.startsWith('https') ? https : http;
