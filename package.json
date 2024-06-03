@@ -2,8 +2,10 @@
     "name": "cheerfully-client",
     "version": "0.0.5",
     "description": "Client tools for Cheerfully service.",
-    "main": "cheer.js",
-    "module": "cheer.js",
+    "main": "./src/index.js",
+    "bin": {
+        "cheer": "./cheer.js"
+    },
     "contributors": [
         "Derek Detweiler <derek@makefullystudios.com>"
     ],

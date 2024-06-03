@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const
     cheer = require('./src/index'),
     getArgsAsObj = () => {
