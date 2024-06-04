@@ -40,6 +40,12 @@ const
 
                     if (choreId) {
                         const
+                            shareStatus = (status) => {
+                                if (status !== lastStatus) {
+                                    console.log(status);
+                                    lastStatus = status;
+                                }
+                            },
                             checkStatus = async () => {
                                 let response = null;
 
@@ -56,16 +62,17 @@ const
                                     if (response.json.errors) {
                                         console.warn('Error', response.json.errors);
                                     } else if (response.json.status) {
-                                        console.log(response.json.status);
+                                        shareStatus(response.json.status);
                                         setTimeout(checkStatus, 10000);
                                     } else {
-                                        console.log(response.json);
+                                        shareStatus(response.json);
                                         setTimeout(checkStatus, 10000);
                                     }
                                 } else {
                                     resolve(response.stream);
                                 }
                             };
+                        let lastStatus = '';
 
                         checkStatus();
                     }
