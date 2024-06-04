@@ -1,41 +1,46 @@
 const
     fs = require('fs').promises,
     getFiles = require("../helpers/getFiles"),
+    getJSON = require('../helpers/getJSON'),
     parseTranscription = async (archive, {
         difference,
+        format,
+        output,
         script,
         src,
         language,
         nowrap,
     } = {}) => {
         const
+            captions = typeof script === 'string' ? await getJSON(script) : script,
             config = {
+                format,
                 language,
                 nowrap
             };
 
-        if (difference && script) {
+        if (difference && captions) {
             const
-                {missing} = await getFiles({
-                    compareAgainst: typeof script === 'string' ? JSON.parse(await fs.readFile(script)) : script,
+                {unlisted} = await getFiles({
+                    compareAgainst: output ? (await getFiles({folder: output})).all : null,
                     folder: src
                 });
 
-            if (missing.length === 0) {
+            if (unlisted.length === 0) {
                 console.log('Captions already up-to-date.');
             } else {
-                missing.forEach((file) => archive.file(`${src}${file}`, {
+                unlisted.forEach((file) => archive.file(`${src}${file}`, {
                     name: file
                 }));
             }
 
-            config.script = missing.reduce((obj, key) => {
-                obj[key] = script[key];
+            config.script = unlisted.reduce((obj, key) => {
+                obj[key] = captions[key];
                 return obj;
             }, {});
         } else {
             archive.directory(src, false);
-            config.script = script;
+            config.script = captions;
         }
         archive.append(JSON.stringify(config, null, 4), {name: 'transcription.json'});
     };

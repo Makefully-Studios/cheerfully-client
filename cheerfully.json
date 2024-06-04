@@ -22,17 +22,17 @@
     }],
     "transcription": [{
         "extract": true,
-        "script": "./example/vo/en.json",
+        "format": "sami",
+        "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/captions/en/",
-        "difference": true,
         "language": "en-US"
     }, {
         "extract": true,
-        "script": "./example/vo/es.json",
-        "src": "./example/vo/es/",
-        "output": "./example/captions/es/",
-        "difference": true,
-        "language": "es-ES"
+        "format": "vtt",
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/",
+        "language": "en-US"
     }]
 }

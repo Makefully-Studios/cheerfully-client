@@ -13,7 +13,7 @@
         "test-elevenlabs": "node ./cheer.js -service elevenlabs",
         "test-polly": "node ./cheer.js -service polly",
         "test-rhubarb": "node ./cheer.js -service rhubarb",
-        "test-transcribe": "node ./cheer.js -service transcribe"
+        "test-transcription": "node ./cheer.js -service transcription"
     },
     "license": "",
     "dependencies": {
