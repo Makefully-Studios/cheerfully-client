@@ -95,6 +95,7 @@ This audio-to-captions service requires audio as input and will download a capti
     "transcription": [{
         "extract": true,
         "format": "sami",
+        "limit": 40,
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/captions/en/",

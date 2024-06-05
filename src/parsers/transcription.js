@@ -1,5 +1,4 @@
 const
-    fs = require('fs').promises,
     getFiles = require("../helpers/getFiles"),
     getJSON = require('../helpers/getJSON'),
     parseTranscription = async (archive, {
@@ -9,13 +8,15 @@ const
         script,
         src,
         language,
-        nowrap,
+        limit,
+        nowrap
     } = {}) => {
         const
             captions = typeof script === 'string' ? await getJSON(script) : script,
             config = {
                 format,
                 language,
+                limit,
                 nowrap
             };
 
