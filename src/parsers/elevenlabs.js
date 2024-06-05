@@ -1,13 +1,17 @@
 const
     fs = require('fs').promises,
     getFiles = require('../helpers/getFiles'),
-    parseElevenLabs = async (archive, config) => {
+    parseElevenLabs = async (archive, config, {elevenLabsApiKey} = {}) => {
         const
             {difference, output, script} = config,
             cfg = {
                 ...config,
                 script: typeof script === 'string' ? JSON.parse(await fs.readFile(script)) : script
             };
+
+        if (elevenLabsApiKey) {
+            cfg.apiKey = elevenLabsApiKey;
+        }
 
         if (difference) {
             const

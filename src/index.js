@@ -151,7 +151,7 @@ const
                         path: output,
                         concurrency: 1
                     }) : fs.createWriteStream(`${output}${id}-${service}${configs.length > 1 ? `-${index}` : ''}.zip`),
-                    archiveStream = await archive((archive) => parsers[service](archive, config)),
+                    archiveStream = await archive((archive) => parsers[service](archive, config, contents)),
                     data = await postStream(`${server}/yap/${service}/${accessToken}`, archiveStream);
         
                 // listen for all archive data to be written
