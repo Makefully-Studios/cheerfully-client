@@ -14,6 +14,7 @@ const
     },
     parseRhubarb = async (archive, {
         difference,
+        files = {},
         language,
         script,
         src,
@@ -21,19 +22,13 @@ const
     }) => {
         const
             compareAgainst = Object.keys((await getJSONorNull(`${output}mouthCues.json`)) ?? {}).map((key) => `${key}.mp3`),
-            captions = typeof script === 'string' ? await getJSON(script) : script,
             config = {
-                language
+                language,
+                files: {
+                    ...(script ? await getJSON(script) : {}),
+                    ...files
+                }
             };
-
-        if (captions) {
-            config.files = Object.keys(captions).reduce((obj, key) => {
-                obj[key] = {
-                    caption: captions[key]
-                };
-                return obj;
-            }, {});
-        }
 
         if (difference && compareAgainst.length) {
             const

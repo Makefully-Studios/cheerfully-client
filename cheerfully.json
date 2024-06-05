@@ -1,6 +1,6 @@
 {
     "rhubarb": {
-        "difference": true,
+        "script": "./example/script.json",
         "extract": true,
         "src": "./example/vo/en/",
         "output": "./example/lipsync/en/"

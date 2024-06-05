@@ -1,13 +1,18 @@
 const
-    fs = require('fs').promises,
     getFiles = require('../helpers/getFiles'),
+    getJSON = require('../helpers/getJSON'),
     parseElevenLabs = async (archive, config, {elevenLabsApiKey} = {}) => {
         const
-            {difference, output, script} = config,
+            {difference, output, script, files = {}} = config,
             cfg = {
                 ...config,
-                script: typeof script === 'string' ? JSON.parse(await fs.readFile(script)) : script
+                files: {
+                    ...(script ? await getJSON(script) : {}),
+                    ...files
+                }
             };
+
+        delete cfg.script;
 
         if (elevenLabsApiKey) {
             cfg.apiKey = elevenLabsApiKey;
@@ -16,12 +21,12 @@ const
         if (difference) {
             const
                 {missing} = await getFiles({
-                    compareAgainst: cfg.script,
+                    compareAgainst: cfg.files,
                     folder: output
                 });
 
-            cfg.script = missing.reduce((obj, file) => {
-                obj[file] = cfg.script[file];
+            cfg.files = missing.reduce((obj, file) => {
+                obj[file] = cfg.files[file];
                 return obj;
             }, {});
         }
