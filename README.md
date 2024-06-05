@@ -106,6 +106,6 @@ This audio-to-captions service requires audio as input and will download a capti
 
 ## Example
 
-Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcribe`.
+Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`.
 
 These examples are specified using a JSON definition in `./cheerfully.json` which you can copy or modify to set different generation parameters as supported by Cheerfully.
