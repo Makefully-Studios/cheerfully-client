@@ -13,10 +13,16 @@ To use the API, you will need to specify a root `./env-cheerfully.json` file wit
 
 ## Services
 
-All services can be specified in `cheerfully.json` as described in the following sections. Services can be run from the console as:
+All services can be specified in `cheerfully.json` as described in the following sections. Services can be run as scripts specified in `package.json` as:
 
-```console
-cheer -service serviceName
+```javascript
+{
+    "scripts": {
+        "speech": "cheer -service elevenlabs",
+        "lipsync": "cheer -service rhubarb",
+        "captions": "cheer -service transcription"
+    }
+}
 ```
 
 Alternatively, services can be run from Node by including the Cheerfully Client as shown:
@@ -26,7 +32,7 @@ const
     cheerfully = require('cheerfully-client');
 
 cheerfully({
-    service: serviceName
+    service: 'polly'
 });
 ```
 
