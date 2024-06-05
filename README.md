@@ -47,10 +47,13 @@ This text-to-voice service requires a script as input and will download audio VO
         "script": "./example/script.json",
         "output": "./example/vo/en/",
         "difference": true,
+        "model": "eleven_multilingual_v1",
         "voice": "Gigi"
     }]
 }
 ```
+
+Specifying the `model` is optional: if unspecified, Cheerfully will pick a good option for the selected `voice`.
 
 You may include your ElevenLabs API Key directly in the ElevenLabs spec above as `apiKey`, or set your API Key separately in `env-cheerfully.json`:
 
