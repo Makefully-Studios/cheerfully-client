@@ -31,8 +31,17 @@ const
                     data += chunk;
                 });
                 res.on('close', () => {
+                    let json = null;
+
+                    try {
+                        json = JSON.parse(data);
+                    } catch (e) {
+                        json = {
+                            errors: [data]
+                        };
+                    }
                     const
-                        {choreId, errors} = JSON.parse(data);
+                        {choreId, errors} = json;
 
                     if (errors) {
                         console.warn(errors.length === 1 ? `Error: ${errors[0]}` : `${errors.length} Errors`, errors);
@@ -75,6 +84,8 @@ const
                         let lastStatus = '';
 
                         checkStatus();
+                    } else {
+                        reject(errors[0] ?? 'A valid chore id was not returned.');
                     }
                 });
             });
