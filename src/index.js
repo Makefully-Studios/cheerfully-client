@@ -17,6 +17,7 @@ const
         transcription
     },
     getJSON = require('./helpers/getJSON'),
+    cleanPath = (path) => path[path.length - 1] === '/' ? path.substring(0, path.length - 1) : path,
     postStream = (url, stream) => new Promise ((resolve, reject) => {
         const
             protocol = url.startsWith('https') ? https : http;
@@ -36,8 +37,12 @@ const
                     try {
                         json = JSON.parse(data);
                     } catch (e) {
+                        const
+                            pre = [data.indexOf('<pre>'), data.indexOf('</pre>')],
+                            htmlError = pre[0] > -1 ? data.substring(pre[0] + 5, pre[1]) : data;
+
                         json = {
-                            errors: [data]
+                            errors: [htmlError]
                         };
                     }
                     const
@@ -163,7 +168,7 @@ const
                         concurrency: 1
                     }) : fs.createWriteStream(`${output}${id}-${service}${configs.length > 1 ? `-${index}` : ''}.zip`),
                     archiveStream = await archive((archive) => parsers[service](archive, config, contents)),
-                    data = await postStream(`${server}/yap/${service}/${accessToken}`, archiveStream);
+                    data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
         
                 // listen for all archive data to be written
                 archiveStream.on('close', function () {
