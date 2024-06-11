@@ -31,6 +31,10 @@ const
 
         return obj;
     },
+    sortKeys = (obj) => Object.keys(obj).sort().reduce((s, key) => {
+        s[key] = obj[key];
+        return s;
+    }, {}),
     createCaptionChecker = async (format, output) => {
         const
             {file, fileType, parse} = formatDiffs[format] ?? {},
@@ -63,10 +67,10 @@ const
                     console.log(`Removed "${caption}"`);
                 }
                 if (raw) {
-                    await fs.writeFile(`${output}${file}`, JSON.stringify({
+                    await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
                         ...raw,
                         ...newCaptions ? await getJSON(`${output}${file}`) : {} // get new version.
-                    }, null, 4));
+                    }), null, 4));
                 }
 
                 return olds.length;
@@ -106,11 +110,9 @@ const
                     throw Error('Captions already up to date.');
                 }
             } else {
-                list.forEach((file) => {
-                    archive.file(`${src}${file}`, {
-                        name: file
-                    });
-                });
+                list.forEach((file) => archive.file(`${src}${file}`, {
+                    name: file
+                }));
             }
 
             cfg.files = list.map((file) => file.substring(0, file.length - 4)).reduce((obj, key) => {

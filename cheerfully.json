@@ -1,10 +1,33 @@
 {
-    "rhubarb": {
+    "rhubarb": [{
         "script": "./example/script.json",
-        "extract": true,
         "src": "./example/vo/en/",
         "output": "./example/lipsync/en/"
-    },
+    }, {
+        "options": {
+            "exportFormat": "tsv",
+            "output": "files"
+        },
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    }, {
+        "options": {
+            "exportFormat": "xml",
+            "output": "files"
+        },
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    }, {
+        "options": {
+            "exportFormat": "dat",
+            "output": "files"
+        },
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    }],
     "polly": [{
         "script": "./example/script.json",
         "output": "./example/vo/en/",
