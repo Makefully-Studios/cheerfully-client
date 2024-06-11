@@ -10,7 +10,7 @@ const
     createDiffChecker = async (format, output, type) => {
         const
             file = 'mouthCues.json',
-            raw = type === 'json' ? await getJSON(`${output}${file}`) : null,
+            raw = type === 'json' ? await getJSON(`${output}${file}`) ?? {} : null,
             alreadyRhubarbed = raw ? Object.keys(raw) : await combine(output, format);
 
         return {
@@ -40,7 +40,7 @@ const
                 if (raw) {
                     await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
                         ...raw,
-                        ...newRhubarb ? await getJSON(`${output}${file}`) : {} // get new version.
+                        ...newRhubarb ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
                     }), null, 4));
                 }
 
@@ -55,7 +55,7 @@ const
                 language,
                 options,
                 files: {
-                    ...(script ? await getJSON(script) : {}),
+                    ...(script ? await getJSON(script) ?? {} : {}),
                     ...files
                 }
             };

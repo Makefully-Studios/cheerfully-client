@@ -38,7 +38,7 @@ const
     createCaptionChecker = async (format, output) => {
         const
             {file, fileType, parse} = formatDiffs[format] ?? {},
-            raw = file ? await getJSON(`${output}${file}`) : null,
+            raw = file ? await getJSON(`${output}${file}`) ?? {} : null,
             alreadyCaptioned = file ? parse(raw) : await combine(output, fileType, parse);
 
         return {
@@ -69,7 +69,7 @@ const
                 if (raw) {
                     await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
                         ...raw,
-                        ...newCaptions ? await getJSON(`${output}${file}`) : {} // get new version.
+                        ...newCaptions ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
                     }), null, 4));
                 }
 
@@ -86,7 +86,7 @@ const
                 limit,
                 nowrap,
                 files: {
-                    ...(script ? await getJSON(script) : {}),
+                    ...(script ? await getJSON(script) ?? {} : {}),
                     ...files
                 }
             };

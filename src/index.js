@@ -203,9 +203,9 @@ const
 
 module.exports = async (cmdArgs) => {
     const
-        package = await getJSON('./package.json'),
-        config = await getJSON('./cheerfully.json'),
-        env = await getJSON('./env-cheerfully.json');
+        package = await getJSON('./package.json') ?? {},
+        config = await getJSON('./cheerfully.json') ?? {},
+        env = await getJSON('./env-cheerfully.json') ?? {};
 
     send({
         id: `${package.name}-${package.version}`,

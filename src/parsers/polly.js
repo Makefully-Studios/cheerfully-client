@@ -28,7 +28,7 @@ const
             cfg = {
                 ...config,
                 files: {
-                    ...(script ? await getJSON(script) : {}),
+                    ...(script ? await getJSON(script) ?? {} : {}),
                     ...files
                 }
             };

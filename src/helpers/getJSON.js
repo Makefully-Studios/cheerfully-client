@@ -20,4 +20,14 @@ const
         });
     });
 
-module.exports = getJSON;
+module.exports = async (path) => {
+    let json = null;
+    
+    try {
+        json = await getJSON(path);
+    } catch (e) {
+        console.warn(e);
+    }
+
+    return json;
+};
