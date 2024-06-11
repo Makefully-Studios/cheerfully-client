@@ -21,15 +21,24 @@
         "voice": "Gigi"
     }],
     "transcription": [{
-        "extract": true,
         "format": "sami",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/captions/en/",
         "language": "en-US"
     }, {
-        "extract": true,
         "format": "vtt",
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/",
+        "language": "en-US"
+    }, {
+        "format": "srt",
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/",
+        "language": "en-US"
+    }, {
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/captions/en/",

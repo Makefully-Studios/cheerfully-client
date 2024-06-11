@@ -1,9 +1,9 @@
 const
     getFiles = require('../helpers/getFiles'),
     getJSON = require('../helpers/getJSON'),
-    parsePolly = async (archive, config) => {
+    parsePolly = async ({archive, config, difference}) => {
         const
-            {difference, output, script, files = {}} = config,
+            {output, script, files = {}} = config,
             cfg = {
                 ...config,
                 files: {

@@ -161,29 +161,42 @@ const
                 console.warn(`Empty configuration for "${service}" service.`);
             } else {
                 const
-                    {accessToken = '', extract = false, id = '', output = './output/', server} = {...contents, ...config},
+                    {accessToken = '', difference: diff = true, extract = true, id = '', output = './output/', server} = {...contents, ...config},
+                    fileName = `${id}-${service}${configs.length > 1 ? `-${index}` : ''}`,
+                    difference = diff && extract,
                     mkdir = await fs.promises.mkdir(output, { recursive: true }),
                     dst = extract ? unzipper.Extract({
                         path: output,
                         concurrency: 1
-                    }) : fs.createWriteStream(`${output}${id}-${service}${configs.length > 1 ? `-${index}` : ''}.zip`),
-                    archiveStream = await archive((archive) => parsers[service](archive, config, contents)),
-                    data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
-        
-                // listen for all archive data to be written
-                archiveStream.on('close', function () {
-                    console.log('completed send');
-                });
+                    }) : fs.createWriteStream(`${output}${fileName}.zip`);
+                    
+                if (diff && !extract) {
+                    console.warn('Warning: Unable to run difference if not extracted: running all.');
+                }
+                
+                try {
+                    const
+                        archiveStream = await archive((archive) => parsers[service]({archive, config, contents, difference, destinationStream: dst})),
+                        data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
+
+
+                    // listen for all archive data to be written
+                    archiveStream.on('close', function () {
+                        console.log('completed send');
+                    });
+                
+                    data.on('error', function (err) {
+                        if (err.code === 'ECONNREFUSED') {
+                            console.warn(`Cannot connect to Cheerfully server "${server}"`);
+                        } else {
+                            throw err;
+                        }
+                    });
             
-                data.on('error', function (err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        console.warn(`Cannot connect to Cheerfully server "${server}"`);
-                    } else {
-                        throw err;
-                    }
-                });
-        
-                data.pipe(dst);
+                    data.pipe(dst);
+                } catch (e) {
+                    console.warn(`Error handling "${fileName}": ${e}`);
+                }
             }
         });
     };

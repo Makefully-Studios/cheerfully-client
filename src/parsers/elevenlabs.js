@@ -1,9 +1,10 @@
 const
     getFiles = require('../helpers/getFiles'),
     getJSON = require('../helpers/getJSON'),
-    parseElevenLabs = async (archive, config, {elevenLabsApiKey} = {}) => {
+    parseElevenLabs = async ({archive, config, difference, contents}) => {
         const
-            {difference, output, script, files = {}} = config,
+            {elevenLabsApiKey} = contents,
+            {output, script, files = {}} = config,
             cfg = {
                 ...config,
                 files: {

@@ -12,17 +12,11 @@ const
 
         return json;
     },
-    parseRhubarb = async (archive, {
-        difference,
-        files = {},
-        language,
-        script,
-        src,
-        output
-    }) => {
+    parseRhubarb = async ({archive, config, difference}) => {
         const
+            {files = {}, language, script, src, output} = config,
             compareAgainst = Object.keys((await getJSONorNull(`${output}mouthCues.json`)) ?? {}).map((key) => `${key}.mp3`),
-            config = {
+            cfg = {
                 language,
                 files: {
                     ...(script ? await getJSON(script) : {}),
@@ -47,7 +41,7 @@ const
         } else {
             archive.directory(src, false);
         }
-        archive.append(JSON.stringify(config, null, 4), {name: 'rhubarb.json'});
+        archive.append(JSON.stringify(cfg, null, 4), {name: 'rhubarb.json'});
     };
 
 module.exports = parseRhubarb;
