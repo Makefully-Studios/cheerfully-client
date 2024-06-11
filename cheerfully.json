@@ -6,18 +6,14 @@
         "output": "./example/lipsync/en/"
     },
     "polly": [{
-        "extract": true,
         "script": "./example/script.json",
         "output": "./example/vo/en/",
-        "difference": true,
         "language": "en-US",
         "voice": "Ivy"
     }],
     "elevenlabs": [{
-        "extract": true,
         "script": "./example/script.json",
         "output": "./example/vo/en/",
-        "difference": true,
         "voice": "Gigi"
     }],
     "transcription": [{
