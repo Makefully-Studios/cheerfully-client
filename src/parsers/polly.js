@@ -1,67 +1,39 @@
 const
-    fs = require('fs').promises,
     getJSON = require('../helpers/getJSON'),
-    matches = (file, types) => types.reduce((prev, current) => prev || (file.slice(-(current.length + 1)) === `.${current}`), false),
-    getFiles = async ({folder = './', compareAgainst = null, fileTypes = []}) => {
+    {appendMP3Meta, filterMP3s} = require('../helpers/voGeneration'),
+    parsePolly = async ({archive, config, contents, destinationStream, difference}) => {
         const
-            all = (await fs.readdir(folder))
-                .filter((file) => (file.indexOf('.') !== 0) && (fileTypes.length === 0 || matches(file, fileTypes)));
-
-        if (compareAgainst) {
-            const
-                list = (Array.isArray(compareAgainst) ? compareAgainst : Object.keys(compareAgainst)).map((id) => `${id}.mp3`);
-
-            return {
-                missing: list.filter((id) => all.indexOf(id) === -1),
-                unlisted: all.filter((id) => list.indexOf(id) === -1),
-                all
-            };
-        }
-
-        return {
-            all
-        };
-    },
-    parsePolly = async ({archive, config, difference}) => {
-        const
-            {output, script, files = {}} = config,
+            {output, script, files = {}, language, voice} = config,
             cfg = {
                 ...config,
                 files: {
                     ...(script ? await getJSON(script) ?? {} : {}),
                     ...files
                 }
-            };
+            },
+            composer = 'Amazon Polly';
 
         delete cfg.script;
 
         if (difference) {
-            const
-                {missing, unlisted} = await getFiles({
-                    compareAgainst: cfg.files,
-                    fileTypes: ['mp3'],
-                    folder: output
-                });
-
-            cfg.files = missing.reduce((obj, file) => {
-                const
-                    id = file.substring(0, file.length - 4);
-
-                obj[id] = cfg.files[id];
-                return obj;
-            }, {});
-
-            for (let i = 0; i < unlisted.length; i++) {
-                await fs.rm(`${output}${unlisted[i]}`);
-                console.log(`Removed "${unlisted[i]}"`);
-            }
-
-            if (missing.length === 0) {
-                throw Error('All voice-over files already exist.');
-            }
+            await filterMP3s({
+                cfg,
+                composer,
+                output,
+                voice
+            });
         }
 
         archive.append(JSON.stringify(cfg, null, 4), {name: 'polly.json'});
+
+        destinationStream.on('close', () => appendMP3Meta({
+            album: contents.id,
+            composer,
+            captions: cfg.files,
+            language,
+            output,
+            voice
+        }));
     };
 
 module.exports = parsePolly;
