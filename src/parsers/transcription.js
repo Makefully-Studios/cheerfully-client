@@ -1,5 +1,6 @@
 const
     fs = require('fs').promises,
+    id3 = require('node-id3').Promise,
     os = require('os'),
     getJSON = require('../helpers/getJSON'),
     getSeparater = (str) => str.indexOf(os.EOL) >= 0 ? os.EOL : '\n',
@@ -11,10 +12,63 @@ const
                 return obj;
             }, {})
         },
-        sami: {fileType: 'sami', parse: (sami) => sami.split(getSeparater(sami)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ')},
-        smi: {fileType: 'smi', parse: (smi) => smi.split(getSeparater(smi)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ')},
-        vtt: {fileType: 'vtt', parse: (vtt) => vtt.split(getSeparater(vtt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ')},
-        srt: {fileType: 'srt', parse: (srt) => srt.split(getSeparater(srt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ')}
+        mp3: {
+            fileType: 'mp3',
+            async parse (path) {
+                const
+                    {synchronisedLyrics} = await id3.read(path);
+
+                if (synchronisedLyrics) {
+                    const
+                        index = synchronisedLyrics.map(({shortText}) => shortText).indexOf('captions');
+
+                    if (index >= 0) {
+                        const
+                            {synchronisedText} = synchronisedLyrics[index];
+
+                        return synchronisedText.map(({text}) => text).join(' ');
+                    }
+                }
+
+                return '';
+            }
+        },
+        sami: {
+            fileType: 'sami',
+            async parse (path) {
+                const
+                    sami = (await fs.readFile(path, 'utf8')).toString();
+                
+                return sami.split(getSeparater(sami)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ');
+            }
+        },
+        smi: {
+            fileType: 'smi',
+            async parse (path) {
+                const
+                    smi = (await fs.readFile(path, 'utf8')).toString();
+
+                return smi.split(getSeparater(smi)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ');
+            }
+        },
+        srt: {
+            fileType: 'srt',
+            async parse (path) {
+                const
+                    srt = (await fs.readFile(path, 'utf8')).toString();
+
+                return srt.split(getSeparater(srt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ');
+            }
+        },
+        vtt: {
+            fileType: 'vtt',
+            async parse (path) {
+                const
+                    vtt = (await fs.readFile(path, 'utf8')).toString();
+
+                return vtt.split(getSeparater(vtt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ');
+            }
+        }
     },
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
     combine = async (path, fileType, parse) => {
@@ -26,7 +80,7 @@ const
             const
                 file = files[i];
                 
-            obj[file.substring(0, file.length - fileType.length - 1)] = parse((await fs.readFile(`${path}${file}`, 'utf8')).toString());
+            obj[file.substring(0, file.length - fileType.length - 1)] = await parse(`${path}${file}`);
         }
 
         return obj;

@@ -104,14 +104,27 @@ This audio-to-captions service requires audio as input and will download a capti
     "transcription": [{
         "extract": true,
         "format": "sami",
+        "language": "en-US",
         "limit": 40,
         "script": "./example/script.json",
         "src": "./example/vo/en/",
-        "output": "./example/captions/en/",
-        "language": "en-US"
+        "nowrap": [],
+        "output": "./example/captions/en/"
     }]
 }
 ```
+
+Transcription supports the following formats:
+
+* JSON
+* MP3 (Embedded in source MP3 as a SYLT ID3 tag labeled "captions".)
+* SAMI / SMI
+* SRT
+* VTT
+
+Specify `limit` to set the maximum number of characters for a single caption line. The default is `40`.
+
+If your scripts include any phrases that should remain unbroken by the captioning process, add them to the `nowrap` list. For example: `"nowrap": ["Makefully Studios"]`.
 
 ## Example
 
