@@ -38,7 +38,7 @@ const
     createDiffChecker = async (format, output, type) => {
         const
             file = 'mouthCues.json',
-            raw = type === 'json' ? await getJSON(`${output}${file}`) ?? {} : null,
+            raw = type === 'json' && format !== 'mp3' ? await getJSON(`${output}${file}`) ?? {} : null,
             alreadyRhubarbed = raw ? Object.keys(raw) : await combine(output, format);
 
         return {
