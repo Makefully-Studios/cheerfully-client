@@ -1,8 +1,36 @@
 const
     fs = require('fs').promises,
     getJSON = require('../helpers/getJSON'),
+    id3 = require('node-id3').Promise,
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
-    combine = async (path, fileType) => (await fs.readdir(path)).filter(filter.bind(null, fileType)).map((file) => file.substring(0, file.length - fileType.length - 1)),
+    combine = async (path, fileType) => {
+        const
+            files = (await fs.readdir(path)).filter(filter.bind(null, fileType)),
+            list = [];
+        
+        for (let i = 0; i < files.length; i++) {
+            const
+                file = files[i];
+
+            if (fileType === 'mp3') { // check id3 for lyrics presence.
+                const
+                    {synchronisedLyrics} = await id3.read(`${path}${file}`);
+
+                if (synchronisedLyrics) {
+                    const
+                        index = synchronisedLyrics.map(({shortText}) => shortText).indexOf('lipsync');
+
+                    if (index >= 0) {
+                        list.push(file.substring(0, file.length - fileType.length - 1));
+                    }
+                }
+            } else {
+                list.push(file.substring(0, file.length - fileType.length - 1));
+            }
+        }
+
+        return list;
+    },
     sortKeys = (obj) => Object.keys(obj).sort().reduce((s, key) => {
         s[key] = obj[key];
         return s;

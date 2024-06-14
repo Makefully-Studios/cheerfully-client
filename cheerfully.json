@@ -27,6 +27,14 @@
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/lipsync/en/"
+    }, {
+        "options": {
+            "exportFormat": "mp3",
+            "output": "files"
+        },
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/vo/en/"
     }],
     "polly": [{
         "script": "./example/script.json",

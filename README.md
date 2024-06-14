@@ -43,10 +43,8 @@ This text-to-voice service requires a script as input and will download audio VO
 ```javascript
 {
     "elevenlabs": [{
-        "extract": true,
         "script": "./example/script.json",
         "output": "./example/vo/en/",
-        "difference": true,
         "model": "eleven_multilingual_v1",
         "voice": "Gigi"
     }]
@@ -70,10 +68,8 @@ This text-to-voice service requires a script as input and will download audio VO
 ```javascript
 {
     "polly": [{
-        "extract": true,
         "script": "./example/script.json",
         "output": "./example/vo/en/",
-        "difference": true,
         "language": "en-US",
         "voice": "Ivy"
     }]
@@ -86,14 +82,17 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 
 ```javascript
 {
-    "rhubarb": {
-        "difference": true,
-        "extract": true,
+    "rhubarb": [{
+        "options" {
+            "exportFormat": "json"
+        },
         "src": "./example/vo/en/",
         "output": "./example/lipsync/en/"
-    }
+    }]
 }
 ```
+
+Export formats include those supported by Rhubarb as well as "mp3" which will embed lipsync timings into the MP3's id3 meta data.
 
 ### Transcription
 
@@ -102,7 +101,6 @@ This audio-to-captions service requires audio as input and will download a capti
 ```javascript
 {
     "transcription": [{
-        "extract": true,
         "format": "sami",
         "language": "en-US",
         "limit": 40,
