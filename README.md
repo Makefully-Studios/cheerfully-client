@@ -46,12 +46,15 @@ This text-to-voice service requires a script as input and will download audio VO
         "script": "./example/script.json",
         "output": "./example/vo/en/",
         "model": "eleven_multilingual_v1",
+        "updateAllMetaData": true,
         "voice": "Gigi"
     }]
 }
 ```
 
 Specifying the `model` is optional: if unspecified, Cheerfully will pick a good option for the selected `voice`.
+
+Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 
 You may include your ElevenLabs API Key directly in the ElevenLabs spec above as `apiKey`, or set your API Key separately in `env-cheerfully.json`:
 
@@ -71,10 +74,13 @@ This text-to-voice service requires a script as input and will download audio VO
         "script": "./example/script.json",
         "output": "./example/vo/en/",
         "language": "en-US",
+        "updateAllMetaData": true,
         "voice": "Ivy"
     }]
 }
 ```
+
+Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 
 ### Rhubarb
 

@@ -40,6 +40,7 @@
         "script": "./example/script.json",
         "output": "./example/vo/en/",
         "language": "en-US",
+        "updateAllMetaData": true,
         "voice": "Ivy"
     }],
     "elevenlabs": [{

@@ -1,6 +1,7 @@
 const
     fs = require('fs').promises,
     id3 = require('node-id3').Promise,
+    getJSON = require('./getJSON'),
     isoLanguageMap = {
         'en-US': 'eng',
         'es-ES': 'spa'
@@ -15,7 +16,8 @@ const
             const
                 keys = Object.keys(compareAgainst),
                 list = keys.map((id) => `${id}.mp3`),
-                missing = [];
+                missing = [],
+                present = [];
 
             // need to check for presence _and_ whether lyrics match.
             for (let i = 0; i < list.length; i++) {
@@ -29,21 +31,26 @@ const
                     const
                         {artist, composer, unsynchronisedLyrics} = await id3.read(`${output}${file}`);
 
-                    // We'll assume the original file should be kept if it doesn't include lyrics due to generation.
-                    if (unsynchronisedLyrics) {
+                    // We'll assume the original file should be kept if it doesn't include this composer due to generation.
+                    if (composer === newComposer) {
                         const
                             newVoice = caption.voice ?? voice,
                             newCaption = caption.caption ?? caption;
 
-                        if (newCaption !== unsynchronisedLyrics.text || artist !== newVoice || composer !== newComposer) {
+                        if (newCaption !== unsynchronisedLyrics.text || artist !== newVoice) {
                             missing.push(file);
+                        } else {
+                            present.push(file);
                         }
+                    } else {
+                        present.push(file);
                     }
                 }
             }
 
             return {
                 missing,
+                present,
                 unlisted: all.filter((id) => list.indexOf(id) === -1),
                 all
             };
@@ -52,32 +59,61 @@ const
         return {
             all
         };
-    };
+    },
+    clamp = (text, max) => {
+        if (text.length <= max) {
+            return text;
+        } else {
+            const
+                arr = text.substring(0, max).split(' ');
 
-module.exports = {
-    // Add caption meta data to files.
-    appendMP3Meta ({album, composer, captions, language, output, voice}) {
+            if (arr.length > 1) {
+                arr.length -= 1; // remove last word which may be partial.
+                return `${arr.join(' ')}...`;
+            } else {
+                return arr[0];
+            }
+        }
+    },
+    appendMP3Meta = ({album, composer, captions, generated = false, language, output, voice}) => {
         Object.keys(captions).forEach(async (id) => {
             const
-                caption = captions[id];
+                caption = captions[id],
+                text = caption?.caption ?? caption,
+                tags = {
+                    album,
+                    title: clamp(text, 40),
+                    unsynchronisedLyrics: {
+                        language: isoLanguageMap[language] ?? 'eng',
+                        text
+                    }
+                };
 
-            await id3.update({
-                album,
-                artist: caption?.voice ?? voice,
-                composer,
-                unsynchronisedLyrics: {
-                    language: isoLanguageMap[language] ?? 'eng',
-                    text: caption?.caption ?? caption
-                }
-            }, `${output}${id}.mp3`);
-            //console.log(await id3.read(`${output}${id}.mp3`));
-            console.log(`Voice generated for "${id}".`);
+            if (composer) {
+                tags.composer = composer;
+                tags.artist = caption?.voice ?? voice;
+            }
+
+            await id3.update(tags, `${output}${id}.mp3`);
+            
+            if (generated) {
+                console.log(`Voice generated for "${id}".`);
+            } else {
+                console.log(`Voice meta data updated for "${id}".`);
+            }
         });
     },
-
-    async filterMP3s ({cfg, composer, output, voice}) {
+    mapReduction = (map, list) => list.reduce((obj, file) => {
         const
-            {missing, unlisted} = await getMP3s({
+            id = file.substring(0, file.length - 4);
+
+        obj[id] = map[id];
+        return obj;
+    }, {}),
+    filterMP3s = async ({album, cfg, composer, language, output, updateAllMetaData, voice}) => {
+        const
+            {files} = cfg,
+            {missing, present, unlisted} = await getMP3s({
                 compareAgainst: cfg.files,
                 composer,
                 fileTypes: ['mp3'],
@@ -85,21 +121,65 @@ module.exports = {
                 voice
             });
 
-        cfg.files = missing.reduce((obj, file) => {
-            const
-                id = file.substring(0, file.length - 4);
-
-            obj[id] = cfg.files[id];
-            return obj;
-        }, {});
+        cfg.files = mapReduction(files, missing);
 
         for (let i = 0; i < unlisted.length; i++) {
             await fs.rm(`${output}${unlisted[i]}`);
             console.log(`Removed "${unlisted[i]}"`);
         }
 
+        if (updateAllMetaData && present.length) {
+            appendMP3Meta({
+                album,
+                captions: mapReduction(files, present),
+                language,
+                output
+            });
+        }
+
         if (missing.length === 0) {
             throw Error('All voice-over files already exist.');
         }
-    }
+    },
+    generateMP3s = async ({album, config, composer, difference, destinationStream}) => {
+        const
+            {output, script, files = {}, language, voice, updateAllMetaData = false} = config,
+            cfg = {
+                ...config,
+                files: {
+                    ...(script ? await getJSON(script) ?? {} : {}),
+                    ...files
+                }
+            };
+
+        delete cfg.script;
+
+        if (difference) {
+            await filterMP3s({
+                album,
+                cfg,
+                composer,
+                language,
+                output,
+                updateAllMetaData,
+                voice
+            });
+        }
+
+        // Add caption meta data to files.
+        destinationStream.on('close', () => appendMP3Meta({
+            album,
+            composer,
+            captions: cfg.files,
+            generated: true,
+            language,
+            output,
+            voice
+        }));
+
+        return cfg;
+    };
+
+module.exports = {
+    generateMP3s
 };
