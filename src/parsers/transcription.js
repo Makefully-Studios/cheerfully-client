@@ -12,6 +12,15 @@ const
                 return obj;
             }, {})
         },
+        lrc: {
+            fileType: 'lrc',
+            async parse (path) {
+                const
+                    lrc = (await fs.readFile(path, 'utf8')).toString();
+
+                return lrc.split(getSeparater(lrc)).filter((line) => line.length > 0 && line.indexOf('[') === 0 && line.indexOf(']') === 9).map((text) => text.substring(10)).join(' ');
+            }
+        },
         mp3: {
             fileType: 'mp3',
             async parse (path) {

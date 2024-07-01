@@ -121,6 +121,7 @@ This audio-to-captions service requires audio as input and will download a capti
 Transcription supports the following formats:
 
 * JSON
+* LRC
 * MP3 (Embedded in source MP3 as a SYLT ID3 tag labeled "captions".)
 * SAMI / SMI
 * SRT

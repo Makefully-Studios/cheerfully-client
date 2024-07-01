@@ -72,7 +72,7 @@
         "output": "./example/captions/en/",
         "language": "en-US"
     }, {
-        "format": "mp3",
+        "format": "lrc",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/vo/en/",
