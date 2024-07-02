@@ -1,6 +1,6 @@
 {
     "name": "cheerfully-client",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {

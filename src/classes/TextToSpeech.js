@@ -1,7 +1,7 @@
 const
+    Cheer = require('./Cheer'),
     fs = require('fs').promises,
     id3 = require('node-id3').Promise,
-    getJSON = require('./getJSON'),
     isoLanguageMap = {
         'en-US': 'eng',
         'es-ES': 'spa'
@@ -110,76 +110,70 @@ const
         obj[id] = map[id];
         return obj;
     }, {}),
-    filterMP3s = async ({album, cfg, composer, language, output, updateAllMetaData, voice}) => {
-        const
-            {files} = cfg,
-            {missing, present, unlisted} = await getMP3s({
-                compareAgainst: cfg.files,
-                composer,
-                fileTypes: ['mp3'],
-                output,
-                voice
-            });
+    TextToSpeech = class extends Cheer {
+        constructor (data) {
+            const
+                {album, composer} = data;
 
-        cfg.files = mapReduction(files, missing);
-
-        for (let i = 0; i < unlisted.length; i++) {
-            await fs.rm(`${output}${unlisted[i]}`);
-            console.log(`Removed "${unlisted[i]}"`);
+            super(data);
+            this.album = album;
+            this.composer = composer;
         }
 
-        if (updateAllMetaData && present.length) {
+        async prepare (data) {
+            await this.replaceConfigPathWithJSON('script', 'files');
+            return super.prepare(data);
+        }
+
+        async checkDifference () {
+            const
+                {album, composer, config} = this,
+                {output, files = {}, language, voice, updateAllMetaData = false} = config,
+                {missing, present, unlisted} = await getMP3s({
+                    compareAgainst: files,
+                    composer,
+                    fileTypes: ['mp3'],
+                    output,
+                    voice
+                });
+    
+            config.files = mapReduction(files, missing);
+    
+            for (let i = 0; i < unlisted.length; i++) {
+                await fs.rm(`${output}${unlisted[i]}`);
+                console.log(`Removed "${unlisted[i]}"`);
+            }
+    
+            if (updateAllMetaData && present.length) {
+                appendMP3Meta({
+                    album,
+                    captions: mapReduction(files, present),
+                    language,
+                    output
+                });
+            }
+    
+            if (missing.length === 0) {
+                throw Error('All voice-over files already exist.');
+            }
+        }
+
+        afterExport (...args) {
+            const
+                {album, composer, config} = this,
+                {files, output, language, voice} = config;
+
             appendMP3Meta({
                 album,
-                captions: mapReduction(files, present),
-                language,
-                output
-            });
-        }
-
-        if (missing.length === 0) {
-            throw Error('All voice-over files already exist.');
-        }
-    },
-    generateMP3s = async ({album, config, composer, difference, destinationStream}) => {
-        const
-            {output, script, files = {}, language, voice, updateAllMetaData = false} = config,
-            cfg = {
-                ...config,
-                files: {
-                    ...(script ? await getJSON(script) ?? {} : {}),
-                    ...files
-                }
-            };
-
-        delete cfg.script;
-
-        if (difference) {
-            await filterMP3s({
-                album,
-                cfg,
                 composer,
+                captions: files,
+                generated: true,
                 language,
                 output,
-                updateAllMetaData,
                 voice
             });
+            super.afterExport(...args);
         }
-
-        // Add caption meta data to files.
-        destinationStream.on('close', () => appendMP3Meta({
-            album,
-            composer,
-            captions: cfg.files,
-            generated: true,
-            language,
-            output,
-            voice
-        }));
-
-        return cfg;
     };
 
-module.exports = {
-    generateMP3s
-};
+module.exports = TextToSpeech;
