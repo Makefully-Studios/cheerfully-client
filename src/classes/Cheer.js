@@ -187,8 +187,11 @@ const
                     concurrency: 1
                 }) : fs.createWriteStream(`${output}${instanceId}.zip`);
 
-            dst.on('close', () => this.afterExport({instanceId}));
-            dst.on('finish', () => this.afterWrite({instanceId}));
+            if (extract) {
+                dst.on('close', () => this.afterExport({instanceId}));
+            } else {
+                dst.on('finish', () => this.afterWrite({instanceId}));
+            }
 
             try {
                 const
