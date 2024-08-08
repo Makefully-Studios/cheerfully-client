@@ -3,6 +3,7 @@
 const
     parsers = {
         elevenlabs: require('./classes/ElevenLabs'),
+        ffmpeg: require('./classes/FFMPEG'),
         polly: require('./classes/Polly'),
         rhubarb: require('./classes/Rhubarb'),
         transcription: require('./classes/Transcription')

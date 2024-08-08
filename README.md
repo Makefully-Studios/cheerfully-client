@@ -47,7 +47,7 @@ This text-to-voice service requires a script as input and will download audio VO
         "output": "./example/vo/en/",
         "model": "eleven_multilingual_v1",
         "updateAllMetaData": true,
-        "voice": "Gigi"
+        "voice": "Laura"
     }]
 }
 ```
@@ -61,6 +61,20 @@ You may include your ElevenLabs API Key directly in the ElevenLabs spec above as
 ```javascript
 {
     "elevenLabsApiKey": "elevenlabsapikeyforyouraccount"
+}
+```
+
+### FFMPEG
+
+This audio file process accepts ffmpeg commandline arguments to perform operations on an audio file.
+
+```javascript
+{
+    "ffmpeg": [{
+        "options": {"ac": 1},
+        "src": "./example/vo/en/",
+        "output": "./example/vo/en/"
+    }]
 }
 ```
 
@@ -90,6 +104,7 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 {
     "rhubarb": [{
         "options" {
+            "compress": true,
             "exportFormat": "json"
         },
         "src": "./example/vo/en/",
@@ -99,6 +114,8 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 ```
 
 Export formats include those supported by Rhubarb as well as "mp3" which will embed lipsync timings into the MP3's id3 meta data.
+
+For exporting to JSON, you can set `compress` to `true` for the format to use JSON arrays similar to Rhubarb's shorter `tsv` format.
 
 ### Transcription
 

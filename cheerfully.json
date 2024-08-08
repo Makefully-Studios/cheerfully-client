@@ -48,6 +48,11 @@
         "output": "./example/vo/en/",
         "voice": "Gigi"
     }],
+    "ffmpeg": [{
+        "options": {"ac": 1},
+        "src": "./example/vo/en/",
+        "output": "./example/vo/en/"
+    }],
     "transcription": [{
         "format": "sami",
         "script": "./example/script.json",

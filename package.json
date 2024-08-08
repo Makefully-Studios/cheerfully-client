@@ -1,6 +1,6 @@
 {
     "name": "cheerfully-client",
-    "version": "1.8.2",
+    "version": "1.8.3",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -9,6 +9,7 @@
     "author": "Derek Detweiler <derek@makefullystudios.com>",
     "scripts": {
         "test-elevenlabs": "node ./cheer.js -service elevenlabs",
+        "test-ffmpeg": "node ./cheer.js -service ffmpeg",
         "test-polly": "node ./cheer.js -service polly",
         "test-rhubarb": "node ./cheer.js -service rhubarb",
         "test-transcription": "node ./cheer.js -service transcription"
