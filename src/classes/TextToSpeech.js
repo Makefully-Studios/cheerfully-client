@@ -29,7 +29,7 @@ const
                     missing.push(file)
                 } else { // not actually missing, so let's check the artist and lyrics.
                     const
-                        {artist, composer, unsynchronisedLyrics} = await id3.read(`${output}${file}`);
+                        {artist, composer, unsynchronisedLyrics = {}} = await id3.read(`${output}${file}`);
 
                     // We'll assume the original file should be kept if it doesn't include this composer due to generation.
                     if (composer === newComposer) {

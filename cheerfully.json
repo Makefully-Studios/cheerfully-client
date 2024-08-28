@@ -82,5 +82,11 @@
         "src": "./example/vo/en/",
         "output": "./example/vo/en/",
         "language": "en-US"
+    }, {
+        "format": "mp3",
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/vo/en/",
+        "language": "en-US"
     }]
 }
