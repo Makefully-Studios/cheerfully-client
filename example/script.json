@@ -3,5 +3,6 @@
     "polly": "You can generate voice-over from a script via Amazon Polly.",
     "elevenlabs": "You can alternatively generate voice-over using ElevenLabs.",
     "captions": "You can generate captions from your voice-over script.",
+    "allosaurus": "You can generate lip-sync via Allosaurus.",
     "rhubarb": "You can also generate lip-sync via Rhubarb."
 }

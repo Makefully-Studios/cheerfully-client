@@ -43,7 +43,7 @@ const
         obj[id] = map[id];
         return obj;
     }, {}),
-    Rhubarb = class Rhubarb extends Cheer {
+    LipSync = class LipSync extends Cheer {
         async prepare (data) {
             this.differenceOnly = false;
             this.updateList = null;
@@ -58,22 +58,22 @@ const
                 {exportFormat = 'json', output: outputType = 'json'} = options,
                 file = 'mouthCues.json',
                 raw = outputType === 'json' && exportFormat !== 'mp3' ? await getJSON(`${output}${file}`) ?? {} : null,
-                alreadyRhubarbed = raw ? Object.keys(raw) : await combine(output, exportFormat),
+                alreadyLipSynced = raw ? Object.keys(raw) : await combine(output, exportFormat),
                 check = (id) => {
                     const
-                        index = alreadyRhubarbed.indexOf(id);
+                        index = alreadyLipSynced.indexOf(id);
 
                     if (index >= 0) {
-                        alreadyRhubarbed.splice(index, 1);
+                        alreadyLipSynced.splice(index, 1);
                         return true;
                     } else {
                         return false;
                     }
                 },
-                mergeRhubarb = async (newRhubarb = false) => { // Must run _after_ all checks and will remove what's left.
-                    for (let i = 0; i < alreadyRhubarbed.length; i++) {
+                mergeLipSync = async (newLipSync = false) => { // Must run _after_ all checks and will remove what's left.
+                    for (let i = 0; i < alreadyLipSynced.length; i++) {
                         const
-                            key = alreadyRhubarbed[i];
+                            key = alreadyLipSynced[i];
 
                         if (raw) {
                             delete raw[key];
@@ -85,11 +85,11 @@ const
                     if (raw) {
                         await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
                             ...raw,
-                            ...newRhubarb ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
+                            ...newLipSync ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
                         }), null, 4));
                     }
 
-                    return alreadyRhubarbed.length;
+                    return alreadyLipSynced.length;
                 },
                 list = (await fs.readdir(src)).filter(filter.bind(null, 'mp3')).filter((file) => !check(file.substring(0, file.length - 4)));
 
@@ -97,7 +97,7 @@ const
 
             if (list.length === 0) {
                 // We'll still run the merge in case any have been removed.
-                if (await mergeRhubarb()) {
+                if (await mergeLipSync()) {
                     throw Error('Old lip-sync removed, but no new ones required generation.');
                 } else {
                     throw Error('Lip-sync already up to date.');
@@ -105,7 +105,7 @@ const
             }
             this.updateList = list;
             config.files = mapReduction(files, list);
-            this.mergeRhubarb = mergeRhubarb;
+            this.mergeLipSync = mergeLipSync;
         }
 
         beforeSend (archive) {
@@ -123,11 +123,11 @@ const
         }
 
         afterExport (...args) {
-            if (this.mergeRhubarb) {
-                this.mergeRhubarb(true);
+            if (this.mergeLipSync) {
+                this.mergeLipSync(true);
             }
             super.afterExport(...args)
         }
     };
 
-module.exports = Rhubarb;
+module.exports = LipSync;

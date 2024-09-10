@@ -1,4 +1,12 @@
 {
+    "allosaurus": [{
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/",
+        "options": {
+            "rhubarb": true,
+            "e": 0.8
+        }
+    }],
     "rhubarb": [{
         "script": "./example/script.json",
         "src": "./example/vo/en/",

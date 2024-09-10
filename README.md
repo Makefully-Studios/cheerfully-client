@@ -96,6 +96,27 @@ This text-to-voice service requires a script as input and will download audio VO
 
 Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 
+### Allosaurus
+
+This audio-to-lip-flap service requires audio as input and will download a mouth cues JSON file delineating mouth shapes for particular timestamps using Allosaurus. You can set Allosaurus settings in `cheerfully.json` like so:
+
+```javascript
+{
+    "allosaurus": [{
+        "options" {
+            "compress": true,
+            "exportFormat": "json"
+        },
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    }]
+}
+```
+
+Export formats include those supported by Rhubarb as well as "mp3" which will embed lipsync timings into the MP3's id3 meta data.
+
+For exporting to JSON, you can set `compress` to `true` for the format to use JSON arrays similar to Rhubarb's shorter `tsv` format.
+
 ### Rhubarb
 
 This audio-to-lip-flap service requires audio as input and will download a mouth cues JSON file delineating mouth shapes for particular timestamps using Rhubarb Lip-Sync. You can set Rhubarb settings in `cheerfully.json` like so:

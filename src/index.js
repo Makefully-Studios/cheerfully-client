@@ -1,11 +1,13 @@
 /* eslint-disable no-sync */
 /* global console, process, require */
 const
+    LipSync = require('./classes/LipSync'),
     parsers = {
+        allosaurus: LipSync,
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
         polly: require('./classes/Polly'),
-        rhubarb: require('./classes/Rhubarb'),
+        rhubarb: LipSync,
         transcription: require('./classes/Transcription')
     },
     getJSON = require('./helpers/getJSON'),
