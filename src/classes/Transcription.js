@@ -4,6 +4,8 @@ const
     id3 = require('node-id3').Promise,
     os = require('os'),
     getJSON = require('../helpers/getJSON'),
+    SEPARATE_CHARACTER = '|',
+    JOIN_CHARACTER = '^',
     getSeparater = (str) => str.indexOf(os.EOL) >= 0 ? os.EOL : '\n',
     formatDiffs = {
         json: {
@@ -123,12 +125,13 @@ const
                 alreadyCaptioned = file ? parse(raw) : await combine(output, fileType, parse),
                 check = (id, caption) => {
                     const
-                        original = alreadyCaptioned[id];
+                        original = alreadyCaptioned[id],
+                        cap = typeof caption === 'string' ? caption.replaceAll(JOIN_CHARACTER, ' ').replaceAll(SEPARATE_CHARACTER, ' ') : null;
         
                     delete alreadyCaptioned[id];
         
                     // if a caption is not supplied (null), we'll assume the existence of an original caption means we don't need to redo.
-                    return caption === null || caption === original;
+                    return cap === null || cap === original;
                 },
                 mergeCaptions = async (newCaptions = false) => { // Must run _after_ all checks and will remove what's left.
                     const
