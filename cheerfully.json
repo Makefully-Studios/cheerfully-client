@@ -4,6 +4,9 @@
         "output": "./example/lipsync/en/",
         "options": {
             "rhubarb": true,
+            "transcribe": true,
+            "transition": true,
+            "k": 3,
             "e": 0.8
         }
     }],
@@ -60,6 +63,14 @@
         "options": {"ac": 1},
         "src": "./example/vo/en/",
         "output": "./example/vo/en/"
+    }],
+    "rasterize": [{
+        "src": "./example/images/",
+        "output": "./example/images/"
+    }, {
+        "exportFormat": "easeljs",
+        "src": "./example/images/",
+        "output": "./example/images/"
     }],
     "transcription": [{
         "format": "sami",

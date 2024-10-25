@@ -7,6 +7,7 @@ const
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
         polly: require('./classes/Polly'),
+        rasterize: require('./classes/Rasterize'),
         rhubarb: LipSync,
         transcription: require('./classes/Transcription')
     },
