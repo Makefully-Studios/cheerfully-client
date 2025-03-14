@@ -88,6 +88,7 @@
         "format": "srt",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
+        "lines": 2,
         "output": "./example/captions/en/",
         "language": "en-US"
     }, {

@@ -1,5 +1,6 @@
 env*.json
 example/captions
+example/images
 example/lipsync
 example/vo
 node_modules
