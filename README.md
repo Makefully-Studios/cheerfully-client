@@ -148,6 +148,7 @@ This audio-to-captions service requires audio as input and will download a capti
         "format": "sami",
         "language": "en-US",
         "limit": 40,
+        "prependSpeaker": "[]",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "nowrap": [],

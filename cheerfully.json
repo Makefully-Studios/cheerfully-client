@@ -74,6 +74,14 @@
     }],
     "transcription": [{
         "format": "sami",
+        "prependSpeaker": true,
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/",
+        "language": "en-US"
+    }, {
+        "format": "smi",
+        "prependSpeaker": " - ",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/captions/en/",
@@ -86,6 +94,7 @@
         "language": "en-US"
     }, {
         "format": "srt",
+        "prependSpeaker": "[]",
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "lines": 2,
@@ -98,6 +107,7 @@
         "language": "en-US"
     }, {
         "format": "lrc",
+        "prependSpeaker": ["(", ")"],
         "script": "./example/script.json",
         "src": "./example/vo/en/",
         "output": "./example/vo/en/",
