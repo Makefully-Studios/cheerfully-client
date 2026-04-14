@@ -7,5 +7,15 @@
     },
     "captions": "You can generate captions from your voice-over script.",
     "allosaurus": "You can generate lip-sync via Allosaurus.",
-    "rhubarb": "You can also generate lip-sync via Rhubarb."
+    "rhubarb": "You can also generate lip-sync via Rhubarb.",
+    "multi": ["You can also have captions with multiple speakers.", {
+        "speaker": "Zach",
+        "caption": "Just provide an array of captions."
+    }, {
+        "speaker": "Brooke",
+        "caption": "And be sure to include a speaker with each caption."
+    }, {
+        "speaker": "Zach",
+        "caption": "That's right!"
+    }]
 }

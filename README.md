@@ -52,6 +52,8 @@ This text-to-voice service requires a script as input and will download audio VO
 }
 ```
 
+You may set a single `voice` value matching an available ElevenLabs voice id or this may be an object of key/value pairs with speaker name keys matched to voice ids. The speaker names must match speakers listed in the script. If "default" is provided as a key, this voice id will be used for any scripts not specifying a speaker.
+
 Specifying the `model` is optional: if unspecified, Cheerfully will pick a good option for the selected `voice`.
 
 Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
@@ -93,6 +95,8 @@ This text-to-voice service requires a script as input and will download audio VO
     }]
 }
 ```
+
+You may set a single `voice` value matching an available AMazon Polly voice or this may be an object of key/value pairs with speaker name keys matched to voices. The speaker names must match speakers listed in the script. If "default" is provided as a key, this voice will be used for any scripts not specifying a speaker.
 
 Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 

@@ -57,7 +57,11 @@
     "elevenlabs": [{
         "script": "./example/script.json",
         "output": "./example/vo/en/",
-        "voice": "Gigi"
+        "voice": {
+            "default": "jBpfuIE2acCO8z3wKNLl",
+            "Brooke": "zrHiDhphv9ZnVXBqCLjz",
+            "Zach": "bVMeCyTHy58xNoL34h3p"
+        }
     }],
     "ffmpeg": [{
         "options": {"ac": 1},
