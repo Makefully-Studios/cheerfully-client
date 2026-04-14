@@ -1,106 +1,18 @@
 const
     Cheer = require('./Cheer'),
+    crypto = require('crypto'),
     fs = require('fs').promises,
-    id3 = require('node-id3').Promise,
-    os = require('os'),
+    getCaptions = require('../helpers/getCaptions'),
     getJSON = require('../helpers/getJSON'),
     SEPARATE_CHARACTER = '|',
     JOIN_CHARACTER = '^',
-    getSeparater = (str) => str.indexOf(os.EOL) >= 0 ? os.EOL : '\n',
-    formatDiffs = {
-        json: {
-            file: 'captions.json',
-            parse: (json) => Object.keys(json).reduce((obj, key) => {
-                obj[key] = json[key].map(({content}) => content).join(' ');
-                return obj;
-            }, {})
-        },
-        lrc: {
-            fileType: 'lrc',
-            async parse (path) {
-                const
-                    lrc = (await fs.readFile(path, 'utf8')).toString();
-
-                return lrc.split(getSeparater(lrc)).filter((line) => line.length > 0 && line.indexOf('[') === 0 && line.indexOf(']') === 9).map((text) => text.substring(10)).join(' ');
-            }
-        },
-        mp3: {
-            fileType: 'mp3',
-            async parse (path) {
-                const
-                    {synchronisedLyrics} = await id3.read(path);
-
-                if (synchronisedLyrics) {
-                    const
-                        index = synchronisedLyrics.map(({shortText}) => shortText).indexOf('captions');
-
-                    if (index >= 0) {
-                        const
-                            {synchronisedText} = synchronisedLyrics[index];
-
-                        return synchronisedText.map(({text}) => text).join(' ');
-                    }
-                }
-
-                return '';
-            }
-        },
-        sami: {
-            fileType: 'sami',
-            async parse (path) {
-                const
-                    sami = (await fs.readFile(path, 'utf8')).toString();
-                
-                return sami.split(getSeparater(sami)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ');
-            }
-        },
-        smi: {
-            fileType: 'smi',
-            async parse (path) {
-                const
-                    smi = (await fs.readFile(path, 'utf8')).toString();
-
-                return smi.split(getSeparater(smi)).map((line) => line.trim()).filter((line) => line[0] !== '<').join(' ');
-            }
-        },
-        srt: {
-            fileType: 'srt',
-            async parse (path) {
-                const
-                    srt = (await fs.readFile(path, 'utf8')).toString();
-
-                return srt.split(getSeparater(srt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ');
-            }
-        },
-        vtt: {
-            fileType: 'vtt',
-            async parse (path) {
-                const
-                    vtt = (await fs.readFile(path, 'utf8')).toString();
-
-                return vtt.split(getSeparater(vtt)).filter((line) => line.length > 0 && line.indexOf(' --> ') === -1 && parseInt(line) != line).join(' ');
-            }
-        }
+    getHash = (strOrObj) => {
+        const
+            data = typeof strOrObj === 'string' ? strOrObj : JSON.stringify(strOrObj);
+            
+        return crypto.createHash('sha256').update(data).digest('hex');
     },
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
-    combine = async (path, fileType, parse) => {
-        const
-            files = (await fs.readdir(path)).filter(filter.bind(null, fileType)),
-            obj = {};
-            
-        for (let i = 0; i < files.length; i++) {
-            const
-                file = files[i];
-                
-            obj[file.substring(0, file.length - fileType.length - 1)] = await parse(`${path}${file}`);
-        }
-
-        return obj;
-    },
-    sortKeys = (obj) => Object.keys(obj).sort().reduce((s, key) => {
-        s[key] = obj[key];
-        return s;
-    }, {}),
     mapReduction = (map, list) => list.reduce((obj, file) => {
         const
             id = file.substring(0, file.length - 4);
@@ -120,18 +32,35 @@ const
             const
                 {config} = this,
                 {files, format = 'json', output, src} = config,
-                {file, fileType, parse} = formatDiffs[format] ?? {},
-                raw = file ? await getJSON(`${output}${file}`) ?? {} : null,
-                alreadyCaptioned = file ? parse(raw) : await combine(output, fileType, parse),
+                fileType = format.toLowerCase(),
+                {captions: alreadyCaptioned, file: captionsFile, hashes} = await getCaptions(output, fileType),
                 check = (id, caption) => {
                     const
                         original = alreadyCaptioned[id],
-                        cap = typeof caption === 'string' ? caption.replaceAll(JOIN_CHARACTER, ' ').replaceAll(SEPARATE_CHARACTER, ' ') : null;
-        
+                        hash = hashes[id];
+                        
                     delete alreadyCaptioned[id];
+                    
+                    if (hash) {
+                        const
+                            same = hash === getHash(caption);
+
+                        if (!same) {
+                            console.log(`Updating "${id}".`);
+                        }
+
+                        return same;
+                    } else {
+                        const
+                            cap = (Array.isArray(caption) ? caption : [caption]).map((cap) => cap?.caption ?? cap ?? null).filter((cap) => cap !== null).join(' ').replaceAll(JOIN_CHARACTER, ' ').replaceAll(SEPARATE_CHARACTER, ' ');
         
-                    // if a caption is not supplied (null), we'll assume the existence of an original caption means we don't need to redo.
-                    return cap === null || cap === original;
+                        if (cap && cap !== original) {
+                            console.log(`Updating "${id}".`);
+                        }
+
+                        // if a caption is not supplied, we'll assume the existence of an original caption means we don't need to redo.
+                        return cap === '' || cap === original;
+                    }
                 },
                 mergeCaptions = async (newCaptions = false) => { // Must run _after_ all checks and will remove what's left.
                     const
@@ -141,18 +70,18 @@ const
                         const
                             caption = olds[i];
     
-                        if (raw) {
-                            delete raw[caption];
+                        if (captionsFile) {
+                            captionsFile.removeKey(caption);
                         } else {
                             await fs.rm(`${output}${caption}.${fileType}`);
                         }
                         console.log(`Removed "${caption}"`);
                     }
-                    if (raw) {
-                        await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
-                            ...raw,
-                            ...newCaptions ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
-                        }), null, 4));
+                    if (captionsFile) {
+                        if (newCaptions) {
+                            captionsFile.mergeData(await getJSON(`${output}captions.json`));
+                        }
+                        await captionsFile.save();
                     }
     
                     return olds.length;
@@ -162,7 +91,7 @@ const
                         id = file.substring(0, file.length - 4),
                         caption = files?.[id];
 
-                    return !check(id, caption?.caption ?? caption ?? null);
+                    return !check(id, caption);
                 });
 
             this.differenceOnly = true;
