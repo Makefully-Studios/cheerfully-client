@@ -7,7 +7,7 @@ module.exports = class ElevenLabs extends TextToSpeech {
             {id, elevenLabsApiKey} = data.contents;
 
         data.album = id;
-        data.composer = 'ElevenLabs';
+        data.encodedBy = 'ElevenLabs';
         if (elevenLabsApiKey) {
             data.config.apiKey = elevenLabsApiKey;
         }

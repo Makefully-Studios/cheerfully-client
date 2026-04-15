@@ -17,13 +17,13 @@ module.exports = async (path, fileType) => {
                 return obj;
             }, {}),
             file,
-            hashes: {}
+            files: null
         };
     } else { // Otherwise we pull all the files and construct a key/value object.
         const
             files = (await fs.readdir(path)).filter(filter.bind(null, fileType)),
             captions = {},
-            hashes = {};
+            fileMap = {};
             
         for (let i = 0; i < files.length; i++) {
             const
@@ -32,13 +32,13 @@ module.exports = async (path, fileType) => {
                 key = filename.substring(0, filename.length - fileType.length - 1);
                 
             captions[key] = file.toString();
-            hashes[key] = file.getHash();
+            fileMap[key] = file;
         }
 
         return {
             captions,
             file: null,
-            hashes
+            files: fileMap
         };
     }
 };

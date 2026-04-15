@@ -9,19 +9,30 @@ module.exports = class MP3 extends File {
         return this.data;
     }
 
-    checkHash () {
+    addHash (hash, {hashKey = 'CaptionHash'} = {}) {
+        const
+            existing = (this.data.userDefinedText ?? []).filter(({description}) => description !== hashKey);
+
+        this.data.userDefinedText = [...existing, {description: hashKey, value: hash}];
+    }
+
+    getHash ({hashKey = 'CaptionHash'} = {}) {
         const
             {userDefinedText} = this.data;
 
         if (userDefinedText) {
             for (let i = 0; i < userDefinedText.length; i++) {
-                if (userDefinedText.description === 'CaptionHash') {
-                    return userDefinedText.value;
+                if (userDefinedText[i].description === hashKey) {
+                    return userDefinedText[i].value;
                 }
             }
         }
 
         return null;
+    }
+
+    save () { // return a promise
+        return id3.write(this.data, this.path);
     }
 
     toString () {

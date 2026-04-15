@@ -4,7 +4,7 @@ const
 module.exports = class Polly extends TextToSpeech {
     constructor (data) {
         data.album = data.contents.id;
-        data.composer = 'Amazon Polly';
+        data.encodedBy = 'Amazon Polly';
         super(data);
     }
 };

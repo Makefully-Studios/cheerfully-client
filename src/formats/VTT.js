@@ -11,6 +11,20 @@ module.exports = class VTT extends File {
         return this.data;
     }
 
+    addHash (hash) {
+        this.data = this.data.replace(/^NOTE[\s]+Hash:[\s]+[a-f0-9]+\n?/im, '');
+
+        const
+            sep = getSeparater(this.data),
+            insertAfter = this.data.match(/^NOTE[\s]+Generator:[^\n]*/im);
+
+        if (insertAfter) {
+            this.data = this.data.replace(insertAfter[0], `${insertAfter[0]}${sep}NOTE Hash: ${hash}`);
+        } else {
+            this.data = this.data.replace('WEBVTT', `WEBVTT${sep}${sep}NOTE Hash: ${hash}`);
+        }
+    }
+    
     getHash () {
         const
             match = this.data.match(/^NOTE[\s]+Hash:[\s]+([a-f0-9]+)/im);

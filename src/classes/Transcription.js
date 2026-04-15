@@ -1,17 +1,12 @@
 const
     Cheer = require('./Cheer'),
-    crypto = require('crypto'),
+    Transcript = require('./Transcript'),
     fs = require('fs').promises,
     getCaptions = require('../helpers/getCaptions'),
+    getFileData = require('../helpers/getFileData'),
     getJSON = require('../helpers/getJSON'),
     SEPARATE_CHARACTER = '|',
     JOIN_CHARACTER = '^',
-    getHash = (strOrObj) => {
-        const
-            data = typeof strOrObj === 'string' ? strOrObj : JSON.stringify(strOrObj);
-            
-        return crypto.createHash('sha256').update(data).digest('hex');
-    },
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
     mapReduction = (map, list) => list.reduce((obj, file) => {
         const
@@ -25,6 +20,23 @@ const
             this.differenceOnly = false;
             this.updateList = null;
             await this.replaceConfigPathWithJSON('script', 'files');
+            
+            // create standardized transcripts and an accompanying hash for each.
+            const
+                {files, voice} = this.config,
+                standardizedFiles = {},
+                transcripts = {};
+            
+            Object.keys(files).forEach((key) => {
+                const
+                    transcript = new Transcript(files[key], {voice});
+
+                standardizedFiles[key] = transcript.toJSON();
+                transcripts[key] = transcript;
+            });
+            this.config.files = standardizedFiles;
+            this.transcripts = transcripts;
+
             return super.prepare(data);
         }
 
@@ -33,17 +45,18 @@ const
                 {config} = this,
                 {files, format = 'json', output, src} = config,
                 fileType = format.toLowerCase(),
-                {captions: alreadyCaptioned, file: captionsFile, hashes} = await getCaptions(output, fileType),
+                {captions: alreadyCaptioned, file: captionsFile, files: fileMap} = await getCaptions(output, fileType),
                 check = (id, caption) => {
                     const
+                        file = fileMap?.[id],
                         original = alreadyCaptioned[id],
-                        hash = hashes[id];
+                        hash = file?.getHash();
                         
                     delete alreadyCaptioned[id];
                     
                     if (hash) {
                         const
-                            same = hash === getHash(caption);
+                            same = hash === this.transcripts[id].getHash();
 
                         if (!same) {
                             console.log(`Updating "${id}".`);
@@ -124,9 +137,24 @@ const
             super.beforeSend(archive);
         }
 
-        afterExport (...args) {
+        async afterExport (...args) {
+            const
+                {config, transcripts, updateList} = this,
+                {format = 'json', output} = config;
+
             if (this.mergeCaptions) {
-                this.mergeCaptions(true);
+                await this.mergeCaptions(true);
+            }
+            if (format !== 'json') {
+                for (let i = 0; i < updateList.length; i++) {
+                    const
+                        filename = updateList[i],
+                        id = filename.substring(0, filename.length - 4),
+                        file = await getFileData(`${output}${id}.${format}`, format);
+
+                    file.addHash(transcripts[id].getHash());
+                    await file.save();
+                }
             }
             super.afterExport(...args)
         }

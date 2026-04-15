@@ -18,6 +18,19 @@ module.exports = class SAMI extends File {
         return this.data;
     }
 
+    addHash (hash) {
+        this.data = this.data.replace(/<META[\s]+Hash="[a-f0-9]+"[\s]*\/>\n?/i, '');
+
+        const
+            insertAfter = this.data.match(/<META[\s]+Generator="[^"]*"[\s]*\/>/i);
+
+        if (insertAfter) {
+            this.data = this.data.replace(insertAfter[0], `${insertAfter[0]}\n    <META Hash="${hash}"/>`);
+        } else {
+            this.data = this.data.replace(/<HEAD>/i, `<HEAD>\n    <META Hash="${hash}"/>`);
+        }
+    }
+    
     getHash () {
         const
             match = this.data.match(/<META[\s]+Hash="([a-f0-9]+)"/i);

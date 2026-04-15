@@ -11,6 +11,20 @@ module.exports = class LRC extends File {
         return this.data;
     }
 
+    addHash (hash) {
+        this.data = this.data.replace(/^\[hash:[a-f0-9]+\]\n?/im, '');
+
+        const
+            sep = getSeparater(this.data),
+            insertAfter = this.data.match(/^\[generator:[^\]]*\]/im);
+
+        if (insertAfter) {
+            this.data = this.data.replace(insertAfter[0], `${insertAfter[0]}${sep}[hash:${hash}]`);
+        } else {
+            this.data = `[hash:${hash}]${sep}${this.data}`;
+        }
+    }
+
     getHash () {
         const
             match = this.data.match(/^\[hash:([a-f0-9]+)\]/im);

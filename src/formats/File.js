@@ -1,4 +1,5 @@
 const
+    fs = require('fs').promises,
     File = class {
         constructor ({fileType}) {
             this.data = null;
@@ -12,6 +13,10 @@ const
 
         getHash () {
             return null; // does not support hashes.
+        }
+
+        save () { // return a promise
+            return fs.writeFile(`${this.path}`, this.data ?? '');
         }
 
         toString () {
