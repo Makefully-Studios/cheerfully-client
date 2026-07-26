@@ -76,14 +76,14 @@ This text-to-voice service requires a script as input and will download audio VO
         "output": "./example/vo/en/",
         "model": "eleven_multilingual_v1",
         "updateAllMetaData": true,
-        "voice": "Laura"
+        "voice": "21m00Tcm4TlvDq8ikWAM"
     }]
 }
 ```
 
-You may set a single `voice` value matching an available ElevenLabs voice id or this may be an object of key/value pairs with speaker name keys matched to voice ids. The speaker names must match speakers listed in the script. If "default" is provided as a key, this voice id will be used for any scripts not specifying a speaker.
+You may set a single `voice` value to an ElevenLabs voice id, or an object of speaker name keys mapped to voice ids. The speaker names must match speakers listed in the script. If "default" is provided as a key, this voice id will be used for any scripts not specifying a speaker.
 
-Specifying the `model` is optional: if unspecified, Cheerfully will pick a good option for the selected `voice`.
+Specifying the `model` is optional: if unspecified, Cheerfully tries to look up the voice id and pick a good model; if lookup fails it falls back to `eleven_multilingual_v2`.
 
 Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 
@@ -253,8 +253,8 @@ Script lines may include an optional `class` (for example `"title"` or `"stage"`
 Script lines may also include an optional `events` array for one-shot timed markers. Entries may be:
 
 * a **number** — add to the running absolute time offset (ms)
-* a **string** `"<phrase"` / `">phrase"` — set the offset to just before/after that phrase in the caption; any other string fires that event at the current offset
-* an **object** `{ "event", "time"?, "before"?, "after"? }` — fires `event`; optional fields set the absolute offset (`time` wins over `before` over `after`)
+* a **string** `"<phrase"` / `">phrase"` — set the offset to just before/after that phrase in the caption (first word may be an incomplete suffix, last word an incomplete prefix); unmatched phrases leave the offset unchanged and are warned/logged for the client; any other string fires that event at the current offset
+* an **object** `{ "event", "time"?, "before"?, "after"? }` — fires `event`; optional fields set the absolute offset (`time` wins over `before` over `after`; same phrase edge rules)
 
 Cheerfully resolves these against caption timings and exports them in parallel using the same caption `format` (`events.json`, `{id}.events.vtt` / `.srt` / `.sami` / `.smi` / `.lrc`, or a separate MP3 SYLT frame with content type `EVENTS` labeled `"events"`).
 

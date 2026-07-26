@@ -1,7 +1,21 @@
 const
     getFileData = require("./getFileData"),
     {readdirOrEmpty} = require("./dirs"),
-    filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`);
+    filter = (fileType, file) => {
+        if (file.indexOf('.') === 0) {
+            return false;
+        }
+
+        if (file.slice(-(fileType.length + 1)) !== `.${fileType}`) {
+            return false;
+        }
+
+        // Parallel event exports are `{id}.events.{format}` — not caption tracks.
+        const
+            base = file.slice(0, -(fileType.length + 1));
+
+        return !base.endsWith('.events');
+    };
 
 module.exports = async (path, fileType) => {
 
@@ -13,6 +27,11 @@ module.exports = async (path, fileType) => {
 
         return {
             captions: Object.keys(json ?? {}).reduce((obj, key) => {
+                // Guard against any legacy/mistaken event keys in captions.json.
+                if (key.endsWith('.events')) {
+                    return obj;
+                }
+
                 obj[key] = json[key].map(({content}) => content).join(' ');
                 return obj;
             }, {}),

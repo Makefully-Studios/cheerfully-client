@@ -53,6 +53,8 @@ const
 
             const
                 {captions: alreadyCaptioned, file: captionsFile, files: fileMap} = await getCaptions(output, fileType),
+                eventsJsonExisting = fileType === 'json' ? await getJSON(`${output}events.json`) : null,
+                eventsFile = eventsJsonExisting ? await getFileData(`${output}events.json`, 'json') : null,
                 check = (id, caption) => {
                     const
                         file = fileMap?.[id],
@@ -82,6 +84,17 @@ const
                         return cap === '' || cap === original;
                     }
                 },
+                saveEventsFile = async () => {
+                    if (!eventsFile) {
+                        return;
+                    }
+
+                    if (Object.keys(eventsFile.data ?? {}).length === 0) {
+                        await fs.rm(eventsFile.path, {force: true});
+                    } else {
+                        await eventsFile.save();
+                    }
+                },
                 mergeCaptions = async (newCaptions = false) => { // Must run _after_ all checks and will remove what's left.
                     const
                         olds = Object.keys(alreadyCaptioned);
@@ -92,14 +105,40 @@ const
     
                         if (captionsFile) {
                             captionsFile.removeKey(caption);
+                            eventsFile?.removeKey(caption);
                         } else {
-                            await fs.rm(`${output}${caption}.${fileType}`);
+                            await fs.rm(`${output}${caption}.${fileType}`, {force: true});
+                            // Remove parallel event export for the same caption id, if present.
+                            await fs.rm(`${output}${caption}.events.${fileType}`, {force: true});
                         }
                         console.log(`Removed "${caption}"`);
                     }
                     if (captionsFile) {
                         if (newCaptions) {
                             captionsFile.mergeData(await getJSON(`${output}captions.json`));
+
+                            // Drop events for every regenerated caption, then merge whatever the server returned.
+                            // Captions that no longer export events stay removed (no orphan keys).
+                            const
+                                updated = this.updateList ?? [],
+                                newEvents = await getJSON(`${output}events.json`) ?? {};
+
+                            updated.forEach((filename) => {
+                                const
+                                    id = filename.substring(0, filename.length - 4);
+
+                                eventsFile?.removeKey(id);
+                            });
+
+                            if (eventsFile) {
+                                eventsFile.mergeData(newEvents);
+                                await saveEventsFile();
+                            } else if (Object.keys(newEvents).length === 0) {
+                                await fs.rm(`${output}events.json`, {force: true});
+                            }
+                            // else: first events.json for this output — unzipped partial is already correct.
+                        } else if (olds.length) {
+                            await saveEventsFile();
                         }
                         await captionsFile.save();
                     }
@@ -128,6 +167,16 @@ const
             this.updateList = list;
             config.files = mapReduction(files, list);
             this.mergeCaptions = mergeCaptions;
+
+            // Sidecar event files are not overwritten when the server omits them — clear before regenerate.
+            if (fileType !== 'json' && fileType !== 'mp3') {
+                for (let i = 0; i < list.length; i++) {
+                    const
+                        id = list[i].substring(0, list[i].length - 4);
+
+                    await fs.rm(`${output}${id}.events.${fileType}`, {force: true});
+                }
+            }
         }
 
         beforeSend (archive) {
