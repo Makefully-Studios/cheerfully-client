@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.14.1
+
+- Upgrade `archiver` so `directory()` works when a modern `glob` is hoisted (fixes `TypeError: glob is not a function`).
+
 ## 1.14.0
 
 - Add `sharp` service client for image convert/compress/resize, thumbnails, and favicon packs.
