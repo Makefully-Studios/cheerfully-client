@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.15.0
+
+- Skip unchanged Sharp, Packfully, and Stackfully image outputs via embedded per-service metadata hashes (`CheerfullySharpHash`, `CheerfullyPackfullyHash`, `CheerfullyStackfullyHash`).
+- Add shared image hash embedders (PNG tEXt, JPEG/WebP/TIFF/AVIF EXIF); unsupported types (e.g. ICO, GIF) always reprocess with a console note.
+
 ## 1.14.1
 
 - Upgrade `archiver` so `directory()` works when a modern `glob` is hoisted (fixes `TypeError: glob is not a function`).

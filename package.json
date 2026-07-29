@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.14.1",
+    "version": "1.15.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -16,6 +16,7 @@
         "README.md"
     ],
     "scripts": {
+        "test": "node --test test/**/*.test.js",
         "test-allosaurus": "node ./cheer.js -service allosaurus",
         "test-elevenlabs": "node ./cheer.js -service elevenlabs",
         "test-ffmpeg": "node ./cheer.js -service ffmpeg",
@@ -23,6 +24,8 @@
         "test-polly": "node ./cheer.js -service polly",
         "test-rasterize": "node ./cheer.js -service rasterize",
         "test-rhubarb": "node ./cheer.js -service rhubarb",
+        "test-sharp": "node ./cheer.js -service sharp",
+        "test-stackfully": "node ./cheer.js -service stackfully",
         "test-transcription": "node ./cheer.js -service transcription",
         "say": "node ./say.js"
     },
@@ -62,6 +65,11 @@
         "archiver": "^7.0.1",
         "node-id3": "^0.2.6",
         "node-web-audio-api": "^2.0.0",
+        "piexifjs": "^1.0.6",
+        "png-chunk-text": "^1.0.0",
+        "png-chunks-encode": "^1.0.0",
+        "png-chunks-extract": "^1.0.0",
+        "sharp": "^0.35.3",
         "unzip-stream": "^0.3.0"
     }
 }

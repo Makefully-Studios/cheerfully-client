@@ -154,6 +154,8 @@ Use `exports: ["texturepacker", "createjs"]` (or `format`) to choose one or more
 
 Spacing: `padding` is empty gap beyond `extrude`; `extrude` is edge-pixel bleed into that gap; `border` is margin from the atlas edge.
 
+Up-to-date atlas PNGs are skipped via an embedded `CheerfullyPackfullyHash` (source bytes + options). Descriptor files (json/css/atlas/xml) are not hash carriers.
+
 ### Sharp
 
 This still-image service converts, compresses, resizes, and can emit multi-size thumbnails or favicon packs (including `.ico`). Every image under `src` is processed; `files` overrides are optional.
@@ -178,6 +180,8 @@ This still-image service converts, compresses, resizes, and can emit multi-size 
     }]
 }
 ```
+
+Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG tEXt / JPEG·WebP EXIF). Per-service keys so Sharp and Packfully/Stackfully hashes do not clobber each other. Formats that cannot store metadata (e.g. `.ico`, `.gif`) are always reprocessed, with a console note.
 
 ### Stackfully
 
@@ -214,6 +218,8 @@ This multi-layer compositing service builds sized outputs from ordered image lay
     }]
 }
 ```
+
+Unchanged composite outputs are skipped via embedded `CheerfullyStackfullyHash` (layer source bytes + recipe). Unsupported output types are always reprocessed with a console note.
 
 ### Polly
 

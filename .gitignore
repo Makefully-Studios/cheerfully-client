@@ -4,3 +4,4 @@ example/images
 example/lipsync
 example/vo
 node_modules
+test/.tmp-*
