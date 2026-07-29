@@ -10,6 +10,8 @@ const
         polly: require('./classes/Polly'),
         rasterize: require('./classes/Rasterize'),
         rhubarb: LipSync,
+        sharp: require('./classes/Sharp'),
+        stackfully: require('./classes/Stackfully'),
         transcription: require('./classes/Transcription')
     },
     getJSON = require('./helpers/getJSON'),

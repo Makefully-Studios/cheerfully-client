@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.14.0
+
+- Add `sharp` service client for image convert/compress/resize, thumbnails, and favicon packs.
+- Add `stackfully` service client for multi-layer image compositing.
+
 ## 1.13.1
 
 - Harden `say` / ElevenLabs export when the result zip has no MP3 (clearer error, no unhandled ENOENT from ID3 metadata).
