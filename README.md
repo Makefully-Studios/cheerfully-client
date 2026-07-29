@@ -156,6 +156,33 @@ Spacing: `padding` is empty gap beyond `extrude`; `extrude` is edge-pixel bleed 
 
 Up-to-date atlas PNGs are skipped via an embedded `CheerfullyPackfullyHash` (source bytes + options). Descriptor files (json/css/atlas/xml) are not hash carriers.
 
+### Classfully
+
+This image-to-CSS service approximates still images as a CSS class rule (deterministic mutation search scored via headless Chromium screenshots). Every image under `src` is processed; `files` overrides are optional.
+
+```javascript
+{
+    "classfully": [{
+        "src": "./example/classfully/",
+        "output": "./example/classfully/out/",
+        "options": {
+            "maxIterations": 40,
+            "minAccuracy": 0.9,
+            "maxMutations": 256
+        },
+        "files": {
+            "swatch.png": {
+                "className": "swatch",
+                "css": "swatch.css"
+            }
+        }
+    }]
+}
+```
+
+* Omit `seed` to start from the image’s average `background-color`; pass `seed` (declarations or a `.css` file in `src`) to refine existing CSS.
+* Output defaults to `{stem}.css` with `.{stem} { … }`; override with `css` / `output` and `className`.
+
 ### Sharp
 
 This still-image service converts, compresses, resizes, and can emit multi-size thumbnails or favicon packs (including `.ico`). Every image under `src` is processed; `files` overrides are optional.

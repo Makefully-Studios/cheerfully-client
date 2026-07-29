@@ -4,6 +4,7 @@ const
     LipSync = require('./classes/LipSync'),
     parsers = {
         allosaurus: LipSync,
+        classfully: require('./classes/Classfully'),
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
         packfully: require('./classes/Packfully'),

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.16.0
+
+- Add `classfully` service client for approximating images as CSS class rules.
+
 ## 1.15.0
 
 - Skip unchanged Sharp, Packfully, and Stackfully image outputs via embedded per-service metadata hashes (`CheerfullySharpHash`, `CheerfullyPackfullyHash`, `CheerfullyStackfullyHash`).

@@ -98,6 +98,21 @@
             "prefix": "multi"
         }
     }],
+    "classfully": [{
+        "src": "./example/classfully/",
+        "output": "./example/classfully/out/",
+        "options": {
+            "maxIterations": 40,
+            "minAccuracy": 0.9,
+            "maxMutations": 256
+        },
+        "files": {
+            "swatch.png": {
+                "className": "swatch",
+                "css": "swatch.css"
+            }
+        }
+    }],
     "rasterize": [{
         "src": "./example/images/",
         "output": "./example/images/"
