@@ -209,7 +209,7 @@ This still-image service converts, compresses, resizes, center-crops (`extract`)
 }
 ```
 
-Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG tEXt / JPEG·WebP·TIFF·AVIF XMP). Per-service keys so Sharp and Packfully/Stackfully hashes do not clobber each other. Formats that cannot store metadata (e.g. `.ico`, `.gif`) are always reprocessed, with a console note.
+Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG tEXt / GIF comment / JPEG·WebP·TIFF·AVIF XMP). Per-service keys so Sharp and Packfully/Stackfully hashes do not clobber each other. Formats that cannot store metadata (e.g. `.ico`) are always reprocessed, with a console note.
 
 ### Stackfully
 

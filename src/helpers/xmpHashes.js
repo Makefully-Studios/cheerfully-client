@@ -1,6 +1,6 @@
 /**
  * Shared Cheerfully hash map in embedded XMP (custom namespace).
- * PNG keeps tEXt; JPEG/WebP/TIFF/AVIF use this packet.
+ * PNG keeps tEXt; GIF uses Comment Extension; JPEG/WebP/TIFF/AVIF use this packet.
  */
 const
     NS = 'https://makefullystudios.com/ns/cheerfully/1.0/',

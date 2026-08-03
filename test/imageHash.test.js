@@ -37,6 +37,8 @@ const
                 await pipeline.jpeg().toFile(file);
             } else if (format === 'webp') {
                 await pipeline.webp().toFile(file);
+            } else if (format === 'gif') {
+                await pipeline.gif().toFile(file);
             } else {
                 await pipeline.png().toFile(file);
             }
@@ -115,6 +117,25 @@ const
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.sharp}), 'w1');
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.packfully}), 'w2');
         assert.ok(xmp.includes('cheerfully:hashes'));
+    }
+
+    // --- GIF multi-key (Comment Extension) ---
+    {
+        const
+            file = await make('multi.gif', {format: 'gif'}),
+            img = await getImageFile(file);
+
+        img.addHash('g1', {hashKey: HASH_KEYS.sharp});
+        img.addHash('g2', {hashKey: HASH_KEYS.packfully});
+        await img.save();
+
+        const
+            again = await getImageFile(file);
+
+        assert.strictEqual(again.getHash({hashKey: HASH_KEYS.sharp}), 'g1');
+        assert.strictEqual(again.getHash({hashKey: HASH_KEYS.packfully}), 'g2');
+        assert.strictEqual(again.getHash({hashKey: HASH_KEYS.stackfully}), null);
+        assert.ok(again.buffer.includes(Buffer.from('CheerfullyHashes:')));
     }
 
     // --- unsupported ICO ---

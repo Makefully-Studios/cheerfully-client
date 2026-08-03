@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.18.0
+
+- Store GIF content hashes in a Comment Extension (`CheerfullyHashes:{...}`), lossless.
+
 ## 1.17.0
 
 - Store JPEG/WebP/TIFF/AVIF content hashes in embedded XMP (`cheerfully:hashes`) instead of EXIF `ImageDescription`, so they no longer appear as Windows Title/Subject.
