@@ -4,8 +4,17 @@ const
     getJSON = require('../helpers/getJSON'),
     http = require('http'),
     https = require('https'),
+    {PassThrough} = require('stream'),
     unzipper = require('unzip-stream'),
     cleanPath = (path) => path[path.length - 1] === '/' ? path.substring(0, path.length - 1) : path,
+    isZipMagic = (buf) => buf && buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b &&
+        ((buf[2] === 0x03 && buf[3] === 0x04) || (buf[2] === 0x05 && buf[3] === 0x06) || (buf[2] === 0x07 && buf[3] === 0x08)),
+    previewText = (buf, max = 240) => {
+        if (!buf || !buf.length) {
+            return '(empty)';
+        }
+        return buf.subarray(0, max).toString('utf8').replace(/\s+/g, ' ').trim();
+    },
     postStream = (url, stream) => new Promise ((resolve, reject) => {
         const
             protocol = url.startsWith('https') ? https : http;
@@ -62,7 +71,12 @@ const
 
                                 if (response.json) {
                                     if (response.json.errors) {
-                                        console.warn('Error', response.json.errors);
+                                        const
+                                            list = Array.isArray(response.json.errors)
+                                                ? response.json.errors
+                                                : [response.json.errors];
+
+                                        reject(new Error(list.join('; ')));
                                     } else if (response.json.status) {
                                         shareStatus(response.json.status);
                                         setTimeout(checkStatus, 10000);
@@ -91,22 +105,81 @@ const
         const
             protocol = url.startsWith('https') ? https : http;
 
-        protocol.get(url, async (res) => {
-            if (res.headers['content-type']?.indexOf('application/json') >= 0) {
-                let data = '';
-                res.on('data', (chunk) => {
-                    data += chunk;
-                });
+        protocol.get(url, (res) => {
+            const
+                contentType = res.headers['content-type'] || '',
+                statusCode = res.statusCode || 0;
+
+            if (contentType.indexOf('application/json') >= 0) {
+                const
+                    chunks = [];
+
+                res.on('data', (chunk) => chunks.push(chunk));
+                res.on('error', reject);
                 res.on('close', () => {
-                    resolve({
-                        json: JSON.parse(data)
-                    });
+                    try {
+                        resolve({
+                            json: JSON.parse(Buffer.concat(chunks).toString('utf8'))
+                        });
+                    } catch (e) {
+                        reject(e);
+                    }
                 });
-            } else {
-                resolve({
-                    stream: res
-                });
+                return;
             }
+
+            // Non-JSON chore results should be zip archives. Peek at the first
+            // bytes so HTML/text error bodies become actionable errors instead of
+            // opaque unzip-stream failures.
+            const
+                chunks = [];
+            let
+                settled = false,
+                total = 0;
+
+            res.on('error', (err) => {
+                if (!settled) {
+                    settled = true;
+                    reject(err);
+                }
+            });
+            res.on('data', (chunk) => {
+                if (settled) {
+                    return;
+                }
+                chunks.push(chunk);
+                total += chunk.length;
+                if (total < 4) {
+                    return;
+                }
+
+                const
+                    head = Buffer.concat(chunks);
+
+                settled = true;
+                if (statusCode >= 400 || !isZipMagic(head)) {
+                    res.resume();
+                    reject(new Error(
+                        `Expected a zip from Cheerfully (HTTP ${statusCode}, ${contentType || 'no content-type'}): ${previewText(head)}`
+                    ));
+                    return;
+                }
+
+                const
+                    out = new PassThrough();
+
+                out.write(head);
+                res.pipe(out);
+                resolve({stream: out});
+            });
+            res.on('end', () => {
+                if (!settled) {
+                    settled = true;
+                    reject(new Error(
+                        `Expected a zip from Cheerfully (HTTP ${statusCode}, ${contentType || 'no content-type'}): ${previewText(Buffer.concat(chunks))}`
+                    ));
+                }
+            });
         }).on('error', (err) => reject(err));
     }),
     archive = async function (parser) {
@@ -203,7 +276,11 @@ const
                 } else {
                     dst.on('finish', () => finish(this.afterWrite));
                 }
-                dst.on('error', reject);
+                dst.on('error', (err) => {
+                    reject(new Error(
+                        `Failed to unpack Cheerfully result into "${output}": ${err.message}`
+                    ));
+                });
 
                 try {
                     const

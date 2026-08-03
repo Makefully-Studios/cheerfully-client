@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+## 1.17.0
+
+- Store JPEG/WebP/TIFF/AVIF content hashes in embedded XMP (`cheerfully:hashes`) instead of EXIF `ImageDescription`, so they no longer appear as Windows Title/Subject.
+- Rename `ExifImage` → `XmpImage`; keep PNG on `tEXt` keywords.
+- Reject non-zip Cheerfully responses with a readable preview instead of crashing inside `unzip-stream`.
+- Surface chore `errors` as hard failures while polling status.
+- Run multi-config services sequentially and catch per-job failures (`for`/`await` instead of fire-and-forget `forEach`).
+- Document Sharp `extract` (center cutout) for favicon packs.
+
 ## 1.16.0
 
 - Add `classfully` service client for approximating images as CSS class rules.

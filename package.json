@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.16.0",
+    "version": "1.17.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -67,7 +67,6 @@
         "archiver": "^7.0.1",
         "node-id3": "^0.2.6",
         "node-web-audio-api": "^2.0.0",
-        "piexifjs": "^1.0.6",
         "png-chunk-text": "^1.0.0",
         "png-chunks-encode": "^1.0.0",
         "png-chunks-extract": "^1.0.0",

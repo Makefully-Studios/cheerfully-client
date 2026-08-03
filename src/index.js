@@ -16,30 +16,39 @@ const
         transcription: require('./classes/Transcription')
     },
     getJSON = require('./helpers/getJSON'),
-    send = function (contents) {
+    send = async function (contents) {
         const
             {id, service} = contents,
             configs = Array.isArray(contents[service]) ? contents[service] : [contents[service]];
 
-        configs.forEach(async (config, index, {length}) => {
+        for (let index = 0; index < configs.length; index++) {
+            const
+                config = configs[index],
+                {length} = configs;
+
             if (!config) {
                 console.warn(`Empty configuration for "${service}" service.`);
-            } else {
-                const
-                    serviceHandler = new parsers[service]({config, contents});
-                    
-                try {
-                    await serviceHandler.prepare({...contents, ...config});
-                } catch (e) {
-                    console.warn(e.message);
-                    return;
-                }
+                continue;
+            }
 
+            const
+                serviceHandler = new parsers[service]({config, contents});
+
+            try {
+                await serviceHandler.prepare({...contents, ...config});
+            } catch (e) {
+                console.warn(e.message);
+                continue;
+            }
+
+            try {
                 await serviceHandler.send({
                     instanceId: `${id}-${service}${length > 1 ? `-${index}` : ''}`
                 });
+            } catch (e) {
+                console.warn(`Error running "${service}" (${index}): ${e.message || e}`);
             }
-        });
+        }
     };
 
 const cheer = async (cmdArgs) => {

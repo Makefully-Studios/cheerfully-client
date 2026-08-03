@@ -73,7 +73,7 @@ const
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.stackfully}), null);
     }
 
-    // --- JPEG multi-key ---
+    // --- JPEG multi-key (XMP, not ImageDescription) ---
     {
         const
             file = await make('multi.jpg', {format: 'jpg'}),
@@ -84,14 +84,20 @@ const
         await img.save();
 
         const
-            again = await getImageFile(file);
+            again = await getImageFile(file),
+            meta = await sharp(again.buffer).metadata(),
+            xmp = meta.xmpAsString || (meta.xmp && meta.xmp.toString('utf8')) || '',
+            exifText = meta.exif ? meta.exif.toString('binary') : '';
 
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.sharp}), 's');
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.stackfully}), 't');
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.packfully}), null);
+        assert.ok(xmp.includes('cheerfully:hashes'));
+        assert.ok(xmp.includes('CheerfullySharpHash'));
+        assert.ok(!exifText.includes('CheerfullyHashes:'));
     }
 
-    // --- WebP multi-key ---
+    // --- WebP multi-key (XMP) ---
     {
         const
             file = await make('multi.webp', {format: 'webp'}),
@@ -102,10 +108,13 @@ const
         await img.save();
 
         const
-            again = await getImageFile(file);
+            again = await getImageFile(file),
+            meta = await sharp(again.buffer).metadata(),
+            xmp = meta.xmpAsString || (meta.xmp && meta.xmp.toString('utf8')) || '';
 
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.sharp}), 'w1');
         assert.strictEqual(again.getHash({hashKey: HASH_KEYS.packfully}), 'w2');
+        assert.ok(xmp.includes('cheerfully:hashes'));
     }
 
     // --- unsupported ICO ---

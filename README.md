@@ -185,7 +185,7 @@ This image-to-CSS service approximates still images as a CSS class rule (determi
 
 ### Sharp
 
-This still-image service converts, compresses, resizes, and can emit multi-size thumbnails or favicon packs (including `.ico`). Every image under `src` is processed; `files` overrides are optional.
+This still-image service converts, compresses, resizes, center-crops (`extract`), and can emit multi-size thumbnails or favicon packs (including `.ico`). Every image under `src` is processed; `files` overrides are optional.
 
 ```javascript
 {
@@ -199,6 +199,7 @@ This still-image service converts, compresses, resizes, and can emit multi-size 
         },
         "files": {
             "logo.png": {
+                "extract": { "width": 1024, "height": 1024 },
                 "format": ["ico", "png"],
                 "sizes": [16, 32, 48, 64, 128, 256],
                 "prefix": "favicon"
@@ -208,7 +209,7 @@ This still-image service converts, compresses, resizes, and can emit multi-size 
 }
 ```
 
-Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG tEXt / JPEG·WebP EXIF). Per-service keys so Sharp and Packfully/Stackfully hashes do not clobber each other. Formats that cannot store metadata (e.g. `.ico`, `.gif`) are always reprocessed, with a console note.
+Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG tEXt / JPEG·WebP·TIFF·AVIF XMP). Per-service keys so Sharp and Packfully/Stackfully hashes do not clobber each other. Formats that cannot store metadata (e.g. `.ico`, `.gif`) are always reprocessed, with a console note.
 
 ### Stackfully
 
