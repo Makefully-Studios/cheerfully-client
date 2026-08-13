@@ -11,9 +11,11 @@ To use the API, you will need to specify a root `./env-cheerfully.json` file wit
 ```javascript
 {
     "server": "http://server:port",
-    "accessToken": "accessTokenToUseCheerfullyService"
+    "accessToken": "BearerTokenForShowfullyYap"
 }
 ```
+
+`accessToken` is sent as `Authorization: Bearer …` on yap submit/status/download (Showfully 1.4+). For local Showfully, use the same value as `SHOWFULLY_DEBUG_TOKEN` with `SHOWFULLY_ALLOW_DEBUG_TOKEN=1`.
 
 ## Services
 

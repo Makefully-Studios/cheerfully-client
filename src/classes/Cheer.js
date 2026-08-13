@@ -15,13 +15,17 @@ const
         }
         return buf.subarray(0, max).toString('utf8').replace(/\s+/g, ' ').trim();
     },
-    postStream = (url, stream) => new Promise ((resolve, reject) => {
+    authHeaders = (accessToken) => (accessToken
+        ? {Authorization: `Bearer ${accessToken}`}
+        : {}),
+    postStream = (url, stream, headers = {}) => new Promise ((resolve, reject) => {
         const
             protocol = url.startsWith('https') ? https : http;
             req = protocol.request(url, {
                 method: 'post',
                 headers: {
-                    'Content-Type': 'application/zip'
+                    'Content-Type': 'application/zip',
+                    ...headers
                 }
             }, async (res) => {
                 let data = '';
@@ -61,7 +65,7 @@ const
                                 let response = null;
 
                                 try {
-                                    response = await fetchStream(`${url}/${choreId}`);
+                                    response = await fetchStream(`${url}/${choreId}`, headers);
                                 } catch (e) {
                                     console.warn(e);
 
@@ -101,11 +105,11 @@ const
 
         stream.pipe(req);
     }),
-    fetchStream = (url) => new Promise((resolve, reject) => {
+    fetchStream = (url, headers = {}) => new Promise((resolve, reject) => {
         const
             protocol = url.startsWith('https') ? https : http;
 
-        protocol.get(url, (res) => {
+        protocol.get(url, {headers}, (res) => {
             const
                 contentType = res.headers['content-type'] || '',
                 statusCode = res.statusCode || 0;
@@ -285,7 +289,11 @@ const
                 try {
                     const
                         archiveStream = await archive((archive) => this.beforeSend(archive)),
-                        data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
+                        data = await postStream(
+                            `${cleanPath(server)}/yap/${service}`,
+                            archiveStream,
+                            authHeaders(accessToken)
+                        );
 
                     // listen for all archive data to be written
                     archiveStream.on('close', function () {

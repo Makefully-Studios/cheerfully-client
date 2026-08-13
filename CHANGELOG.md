@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.19.0
+
+- Authenticate Showfully yap chores with `Authorization: Bearer` and `POST /yap/:service` (token no longer in the URL path).
+
 ## 1.18.0
 
 - Store GIF content hashes in a Comment Extension (`CheerfullyHashes:{...}`), lossless.

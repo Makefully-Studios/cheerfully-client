@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.18.0",
+    "version": "1.19.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
