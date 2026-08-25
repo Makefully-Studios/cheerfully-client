@@ -355,9 +355,40 @@ Script lines may also include an optional `events` array for one-shot timed mark
 
 Cheerfully resolves these against caption timings and exports them in parallel using the same caption `format` (`events.json`, `{id}.events.vtt` / `.srt` / `.sami` / `.smi` / `.lrc`, or a separate MP3 SYLT frame with content type `EVENTS` labeled `"events"`).
 
+### Translate
+
+This text-to-text service translates Cheerfully scripts or language-matrix CSV/TSV via Amazon Translate. Set jobs in `cheerfully.json`:
+
+```javascript
+{
+    "translate": [{
+        "script": "./example/script.json",
+        "language": "en-US",
+        "languages": ["es-ES", "fr-FR"],
+        "output": "./example/scripts/",
+        "ignore": ["Makefully Studios"]
+    }, {
+        "script": "./example/strings.csv",
+        "language": "en-US",
+        "languages": ["es-ES", "fr-FR"],
+        "output": "./example/scripts/"
+    }]
+}
+```
+
+* `script` — path to a Cheerfully `.json` script or a language-matrix `.csv` / `.tsv` (first column = ids, first row = language tags).
+* `language` — source locale (CSV: source column). Matrix jobs require this; JSON may use `auto`.
+* `languages` — target locales to produce or fill.
+* `format` / `exports` — optional. Defaults to the source extension (`json`, `csv`, or `tsv`).
+* `ignore` — phrases left untranslated.
+
+JSON sources write `{lang}/{basename}.{ext}` under `output`. CSV/TSV sources write an updated matrix file and leave existing non-empty cells unchanged.
+
+Supported formats: `json`, `i18n`, `csv`, `tsv`, `po`, `xliff`, `properties`, `yml` / `yaml`, `strings`, `xml`.
+
 ## Example
 
-Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`. Sample sprites for atlas packing are under `./example/sprites/`; run `npm run test-packfully` to pack them into `./example/atlases/`.
+Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`. Sample sprites for atlas packing are under `./example/sprites/`; run `npm run test-packfully` to pack them into `./example/atlases/`. Run `npm run test-translate` to translate `./example/script.json` and `./example/strings.csv` into `./example/scripts/`.
 
 These examples are specified using a JSON definition in `./cheerfully.json` which you can copy or modify to set different generation parameters as supported by Cheerfully.
 

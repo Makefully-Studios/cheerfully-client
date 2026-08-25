@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.20.0
+
+- Add `translate` client for Amazon Translate (Cheerfully script JSON or language-matrix CSV/TSV).
+- Support `ignore` for phrases left untranslated.
+
 ## 1.19.0
 
 - Authenticate Showfully yap chores with `Authorization: Bearer` and `POST /yap/:service` (token no longer in the URL path).

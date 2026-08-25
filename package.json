@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -28,6 +28,7 @@
         "test-sharp": "node ./cheer.js -service sharp",
         "test-stackfully": "node ./cheer.js -service stackfully",
         "test-transcription": "node ./cheer.js -service transcription",
+        "test-translate": "node ./cheer.js -service translate",
         "say": "node ./say.js"
     },
     "repository": {
@@ -50,7 +51,8 @@
         "packfully",
         "atlas",
         "spritesheet",
-        "classfully"
+        "classfully",
+        "translate"
     ],
     "author": "Derek Detweiler <derek@makefullystudios.com>",
     "contributors": [

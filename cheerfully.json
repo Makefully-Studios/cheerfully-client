@@ -167,5 +167,18 @@
         "src": "./example/vo/en/",
         "output": "./example/vo/en/",
         "language": "en-US"
+    }],
+    "translate": [{
+        "script": "./example/script.json",
+        "language": "en-US",
+        "languages": ["es-ES"],
+        "output": "./example/scripts/",
+        "ignore": ["Cheerfully", "Amazon Polly", "ElevenLabs", "Allosaurus", "Rhubarb"]
+    }, {
+        "script": "./example/strings.csv",
+        "language": "en-US",
+        "languages": ["es-ES", "fr-FR"],
+        "output": "./example/scripts/",
+        "ignore": ["Cheerfully", "Amazon Polly"]
     }]
 }

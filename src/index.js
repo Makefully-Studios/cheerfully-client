@@ -13,7 +13,8 @@ const
         rhubarb: LipSync,
         sharp: require('./classes/Sharp'),
         stackfully: require('./classes/Stackfully'),
-        transcription: require('./classes/Transcription')
+        transcription: require('./classes/Transcription'),
+        translate: require('./classes/Translate')
     },
     getJSON = require('./helpers/getJSON'),
     send = async function (contents) {
