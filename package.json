@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.21.0",
+    "version": "1.21.1",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -73,6 +73,6 @@
         "png-chunks-encode": "^1.0.0",
         "png-chunks-extract": "^1.0.0",
         "sharp": "^0.35.3",
-        "unzip-stream": "^0.3.0"
+        "unzip-stream": "^0.3.2"
     }
 }

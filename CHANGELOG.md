@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.21.1
+
+- Bump `unzip-stream` to ^0.3.2 (fixes zip-slip arbitrary file write, GHSA-6jrj-vc65-c983).
+
 ## 1.21.0
 
 - Add `jobExports` mirror for multi-format diff checks in LipSync and Transcription.
