@@ -288,9 +288,30 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 }
 ```
 
-Export formats include those supported by Rhubarb as well as "mp3" which will embed lipsync timings into the MP3's id3 meta data.
+Export formats include those supported by Rhubarb as well as `mp3`, which embeds lipsync timings into the MP3's ID3 metadata.
+
+Set `exportFormat`, `exports`, or omit/`null` for export selection:
+
+* **string** — one format (for example `"json"` or `"mp3"`)
+* **array** — multiple formats in one run (for example `"exports": ["json", "mp3"]`)
+* **`null` / omit** — all supported formats (difference checks require every format to be current)
+
+MP3 export does **not** include `mouthCues.json` unless `json` is also requested.
 
 For exporting to JSON, you can set `compress` to `true` for the format to use JSON arrays similar to Rhubarb's shorter `tsv` format.
+
+```javascript
+{
+    "rhubarb": [{
+        "exports": ["json", "mp3"],
+        "options": {
+            "compress": true
+        },
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
+    }]
+}
+```
 
 ### Rhubarb
 
@@ -309,7 +330,9 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 }
 ```
 
-Export formats include those supported by Rhubarb as well as "mp3" which will embed lipsync timings into the MP3's id3 meta data.
+Export formats include those supported by Rhubarb as well as `mp3`, which embeds lipsync timings into the MP3's ID3 metadata.
+
+Use `exportFormat`, `exports`, or omit/`null` with the same string | array | all semantics as Rhubarb (see Allosaurus above).
 
 For exporting to JSON, you can set `compress` to `true` for the format to use JSON arrays similar to Rhubarb's shorter `tsv` format.
 
@@ -340,6 +363,24 @@ Transcription supports the following formats:
 * SAMI / SMI
 * SRT
 * VTT
+
+Use `format`, `exports`, or omit/`null`:
+
+* **string** — one format (for example `"vtt"`)
+* **array** — multiple formats (for example `"exports": ["json", "vtt", "srt"]`)
+* **`null` / omit on `exports`** — all supported formats in one Cheerfully run
+
+```javascript
+{
+    "transcription": [{
+        "exports": ["json", "vtt", "srt"],
+        "language": "en-US",
+        "script": "./example/script.json",
+        "src": "./example/vo/en/",
+        "output": "./example/captions/en/"
+    }]
+}
+```
 
 Specify `limit` to set the maximum number of characters for a single caption line. The default is `40`.
 

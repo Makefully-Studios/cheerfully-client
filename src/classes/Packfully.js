@@ -10,18 +10,48 @@ const
         listImageFiles
     } = require('../helpers/imageHash'),
     {ensureDir, readdirOrEmpty} = require('../helpers/dirs'),
+    {resolveJobExports} = require('../helpers/jobExports'),
     HASH_KEY = HASH_KEYS.packfully,
+    packfullyAlias = (format) => {
+        const
+            id = String(format || 'texturepacker').toLowerCase();
+
+        switch (id) {
+        case 'texturepacker':
+        case 'json-hash':
+        case 'jsonhash':
+        case 'pixi':
+        case 'phaser-hash':
+        case 'phaserhash':
+            return 'texturepacker';
+        case 'json-array':
+        case 'jsonarray':
+        case 'phaser-array':
+        case 'phaserarray':
+            return 'json-array';
+        case 'createjs':
+        case 'easeljs':
+            return 'createjs';
+        case 'spine':
+        case 'atlas':
+            return 'spine';
+        default:
+            return id;
+        }
+    },
     listFormats = (job = {}) => {
         const
-            raw = job.exports ?? job.format ?? job.options?.format;
+            raw = job.exports ?? job.format ?? job.options?.format,
+            normalizedJob = raw === undefined
+                ? job
+                : {
+                    ...job,
+                    exports: (Array.isArray(raw) ? raw : [raw]).map(packfullyAlias),
+                    format: undefined
+                },
+            list = resolveJobExports(normalizedJob, 'packfully', {defaultFormats: ['texturepacker']});
 
-        if (raw == null) {
-            return ['texturepacker'];
-        }
-        const
-            list = Array.isArray(raw) ? raw : [raw];
-
-        return [...new Set(list.map((f) => String(f).toLowerCase()))];
+        return [...new Set(list.map(packfullyAlias))];
     },
     Packfully = class Packfully extends Cheer {
         async checkDifference () {

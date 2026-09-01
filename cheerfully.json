@@ -11,9 +11,14 @@
         }
     }],
     "rhubarb": [{
+        "exports": ["json", "mp3"],
         "script": "./example/script.json",
         "src": "./example/vo/en/",
-        "output": "./example/lipsync/en/"
+        "output": "./example/lipsync/en/",
+        "options": {
+            "compress": true,
+            "output": "json"
+        }
     }, {
         "options": {
             "exportFormat": "tsv",

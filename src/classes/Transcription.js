@@ -5,6 +5,7 @@ const
     getCaptions = require('../helpers/getCaptions'),
     getFileData = require('../helpers/getFileData'),
     getJSON = require('../helpers/getJSON'),
+    {resolveJobExports} = require('../helpers/jobExports'),
     {ensureDir, readdirOrEmpty} = require('../helpers/dirs'),
     SEPARATE_CHARACTER = '|',
     JOIN_CHARACTER = '^',
@@ -22,7 +23,6 @@ const
             this.updateList = null;
             await this.replaceConfigPathWithJSON('script', 'files');
             
-            // create standardized transcripts and an accompanying hash for each.
             const
                 {files, voice} = this.config,
                 standardizedFiles = {},
@@ -44,45 +44,68 @@ const
         async checkDifference () {
             const
                 {config} = this,
-                {files, format = 'json', output, src} = config,
-                fileType = format.toLowerCase();
+                {files, format = 'json', exports, output, src} = config,
+                exportFormats = resolveJobExports({format, exports}, 'transcription', {
+                    defaultFormats: [format || 'json']
+                }),
+                formatState = {};
 
             if (output) {
                 await ensureDir(output);
             }
 
+            for (let i = 0; i < exportFormats.length; i++) {
+                const
+                    fileType = exportFormats[i];
+
+                formatState[fileType] = await getCaptions(output, fileType);
+            }
+
             const
-                {captions: alreadyCaptioned, file: captionsFile, files: fileMap} = await getCaptions(output, fileType),
-                eventsJsonExisting = fileType === 'json' ? await getJSON(`${output}events.json`) : null,
+                jsonState = formatState.json,
+                eventsJsonExisting = exportFormats.includes('json') ? await getJSON(`${output}events.json`) : null,
                 eventsFile = eventsJsonExisting ? await getFileData(`${output}events.json`, 'json') : null,
-                check = (id, caption) => {
+                staleByFormat = exportFormats.reduce((obj, fileType) => {
+                    obj[fileType] = {...(formatState[fileType]?.captions ?? {})};
+                    return obj;
+                }, {}),
+                checkFormat = (fileType, id, caption) => {
                     const
-                        file = fileMap?.[id],
-                        original = alreadyCaptioned[id],
+                        state = formatState[fileType],
+                        file = state?.files?.[id],
+                        original = state?.captions?.[id],
                         hash = file?.getHash();
-                        
-                    delete alreadyCaptioned[id];
-                    
+
+                    delete staleByFormat[fileType][id];
+
                     if (hash) {
                         const
                             same = hash === this.transcripts[id].getHash();
 
                         if (!same) {
-                            console.log(`Updating "${id}".`);
+                            console.log(`Updating "${id}" (${fileType}).`);
                         }
 
                         return same;
-                    } else {
-                        const
-                            cap = (Array.isArray(caption) ? caption : [caption]).map((cap) => cap?.caption ?? cap ?? null).filter((cap) => cap !== null).join(' ').replaceAll(JOIN_CHARACTER, ' ').replaceAll(SEPARATE_CHARACTER, ' ');
-        
-                        if (cap && cap !== original) {
-                            console.log(`Updating "${id}".`);
-                        }
-
-                        // if a caption is not supplied, we'll assume the existence of an original caption means we don't need to redo.
-                        return cap === '' || cap === original;
                     }
+
+                    const
+                        cap = (Array.isArray(caption) ? caption : [caption]).map((cap) => cap?.caption ?? cap ?? null).filter((cap) => cap !== null).join(' ').replaceAll(JOIN_CHARACTER, ' ').replaceAll(SEPARATE_CHARACTER, ' ');
+
+                    if (cap && cap !== original) {
+                        console.log(`Updating "${id}" (${fileType}).`);
+                    }
+
+                    return cap === '' || cap === original;
+                },
+                check = (id, caption) => {
+                    for (let i = 0; i < exportFormats.length; i++) {
+                        if (!checkFormat(exportFormats[i], id, caption)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
                 },
                 saveEventsFile = async () => {
                     if (!eventsFile) {
@@ -95,30 +118,40 @@ const
                         await eventsFile.save();
                     }
                 },
-                mergeCaptions = async (newCaptions = false) => { // Must run _after_ all checks and will remove what's left.
+                mergeCaptions = async (newCaptions = false) => {
                     const
-                        olds = Object.keys(alreadyCaptioned);
-                        
-                    for (let i = 0; i < olds.length; i++) {
+                        staleIds = new Set();
+
+                    exportFormats.forEach((fileType) => {
+                        Object.keys(staleByFormat[fileType] || {}).forEach((id) => staleIds.add(id));
+                    });
+
+                    for (const caption of staleIds) {
                         const
-                            caption = olds[i];
-    
+                            captionsFile = jsonState?.file;
+
                         if (captionsFile) {
                             captionsFile.removeKey(caption);
                             eventsFile?.removeKey(caption);
                         } else {
-                            await fs.rm(`${output}${caption}.${fileType}`, {force: true});
-                            // Remove parallel event export for the same caption id, if present.
-                            await fs.rm(`${output}${caption}.events.${fileType}`, {force: true});
+                            for (let i = 0; i < exportFormats.length; i++) {
+                                const
+                                    fileType = exportFormats[i];
+
+                                if (fileType !== 'json') {
+                                    await fs.rm(`${output}${caption}.${fileType}`, {force: true});
+                                    await fs.rm(`${output}${caption}.events.${fileType}`, {force: true});
+                                }
+                            }
                         }
+
                         console.log(`Removed "${caption}"`);
                     }
-                    if (captionsFile) {
-                        if (newCaptions) {
-                            captionsFile.mergeData(await getJSON(`${output}captions.json`));
 
-                            // Drop events for every regenerated caption, then merge whatever the server returned.
-                            // Captions that no longer export events stay removed (no orphan keys).
+                    if (jsonState?.file) {
+                        if (newCaptions) {
+                            jsonState.file.mergeData(await getJSON(`${output}captions.json`));
+
                             const
                                 updated = this.updateList ?? [],
                                 newEvents = await getJSON(`${output}events.json`) ?? {};
@@ -136,14 +169,14 @@ const
                             } else if (Object.keys(newEvents).length === 0) {
                                 await fs.rm(`${output}events.json`, {force: true});
                             }
-                            // else: first events.json for this output — unzipped partial is already correct.
-                        } else if (olds.length) {
+                        } else if (staleIds.size) {
                             await saveEventsFile();
                         }
-                        await captionsFile.save();
+
+                        await jsonState.file.save();
                     }
-    
-                    return olds.length;
+
+                    return staleIds.size;
                 },
                 list = (await readdirOrEmpty(src)).filter(filter.bind(null, 'mp3')).filter((file) => {
                     const
@@ -153,10 +186,18 @@ const
                     return !check(id, caption);
                 });
 
+            if (exportFormats.length === 1) {
+                config.format = exportFormats[0];
+                delete config.exports;
+            } else {
+                config.exports = exportFormats;
+                delete config.format;
+            }
+
             this.differenceOnly = true;
+            this.exportFormats = exportFormats;
 
             if (list.length === 0) {
-                // We'll still run the merge in case any have been removed.
                 if (await mergeCaptions()) {
                     throw Error('Old captions removed, but no new captions required generation.');
                 } else {
@@ -168,13 +209,17 @@ const
             config.files = mapReduction(files, list);
             this.mergeCaptions = mergeCaptions;
 
-            // Sidecar event files are not overwritten when the server omits them — clear before regenerate.
-            if (fileType !== 'json' && fileType !== 'mp3') {
-                for (let i = 0; i < list.length; i++) {
-                    const
-                        id = list[i].substring(0, list[i].length - 4);
+            for (let i = 0; i < exportFormats.length; i++) {
+                const
+                    fileType = exportFormats[i];
 
-                    await fs.rm(`${output}${id}.events.${fileType}`, {force: true});
+                if (fileType !== 'json' && fileType !== 'mp3') {
+                    for (let j = 0; j < list.length; j++) {
+                        const
+                            id = list[j].substring(0, list[j].length - 4);
+
+                        await fs.rm(`${output}${id}.events.${fileType}`, {force: true});
+                    }
                 }
             }
         }
@@ -195,23 +240,32 @@ const
 
         async afterExport (...args) {
             const
-                {config, transcripts, updateList} = this,
-                {format = 'json', output} = config;
+                {config, transcripts, updateList, exportFormats = [config.format || 'json']} = this,
+                {output} = config;
 
             if (this.mergeCaptions) {
                 await this.mergeCaptions(true);
             }
-            if (format !== 'json') {
-                for (let i = 0; i < updateList.length; i++) {
+
+            for (let i = 0; i < exportFormats.length; i++) {
+                const
+                    formatId = exportFormats[i];
+
+                if (formatId === 'json') {
+                    continue;
+                }
+
+                for (let j = 0; j < updateList.length; j++) {
                     const
-                        filename = updateList[i],
+                        filename = updateList[j],
                         id = filename.substring(0, filename.length - 4),
-                        file = await getFileData(`${output}${id}.${format}`, format);
+                        file = await getFileData(`${output}${id}.${formatId}`, formatId);
 
                     file.addHash(transcripts[id].getHash());
                     await file.save();
                 }
             }
+
             super.afterExport(...args)
         }
     };

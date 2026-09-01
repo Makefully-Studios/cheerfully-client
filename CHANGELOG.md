@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-## 1.20.0
+## 1.21.0
+
+- Add `jobExports` mirror for multi-format diff checks in LipSync and Transcription.
+- Packfully difference checks honor `exports: null` → all atlas formats.
+- Document `exports` string | array | null semantics for lipsync and transcription jobs.
+
 
 - Add `translate` client for Amazon Translate (Cheerfully script JSON or language-matrix CSV/TSV).
 - Support `ignore` for phrases left untranslated.
